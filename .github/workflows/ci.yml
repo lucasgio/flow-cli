@@ -1,0 +1,140 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        dart-version: [3.0.0, stable]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
+      with:
+        dart-version: ${{ matrix.dart-version }}
+    
+    - name: Install dependencies
+      run: dart pub get
+    
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed .
+    
+    - name: Analyze project source
+      run: dart analyze --fatal-infos
+    
+    - name: Run tests
+      run: dart test
+    
+    - name: Compile executable
+      run: dart compile exe bin/main.dart -o flow_cli
+    
+    - name: Test executable
+      run: ./flow_cli --help
+      shell: bash
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
+      with:
+        dart-version: stable
+    
+    - name: Install dependencies
+      run: dart pub get
+    
+    - name: Build executables
+      run: |
+        dart compile exe bin/main.dart -o flow_cli_linux
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: flow_cli_executables
+        path: |
+          flow_cli_linux
+
+  publish:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
+      with:
+        dart-version: stable
+    
+    - name: Install dependencies
+      run: dart pub get
+    
+    - name: Publish to pub.dev
+      run: dart pub publish --force
+      env:
+        PUB_TOKEN: ${{ secrets.PUB_TOKEN }}
+
+  release:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: flow_cli_linux
+            asset_name: flow_cli_linux
+          - os: macos-latest
+            artifact_name: flow_cli_macos
+            asset_name: flow_cli_macos
+          - os: windows-latest
+            artifact_name: flow_cli_windows.exe
+            asset_name: flow_cli_windows.exe
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
+      with:
+        dart-version: stable
+    
+    - name: Install dependencies
+      run: dart pub get
+    
+    - name: Build executable
+      run: |
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          dart compile exe bin/main.dart -o ${{ matrix.artifact_name }}
+        else
+          dart compile exe bin/main.dart -o ${{ matrix.artifact_name }}
+        fi
+      shell: bash
+    
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./${{ matrix.artifact_name }}
+        asset_name: ${{ matrix.asset_name }}
+        asset_content_type: application/octet-stream

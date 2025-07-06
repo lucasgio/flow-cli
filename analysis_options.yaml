@@ -1,0 +1,17 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - "**.g.dart"
+    - "**.freezed.dart"
+  
+linter:
+  rules:
+    - prefer_single_quotes
+    - use_key_in_widget_constructors
+    - avoid_print
+    - prefer_const_constructors
+    - prefer_const_literals_to_create_immutables
+    - prefer_final_fields
+    - unnecessary_const
+    - avoid_unnecessary_containers
