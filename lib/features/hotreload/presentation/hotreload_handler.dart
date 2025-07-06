@@ -12,7 +12,6 @@ import 'package:flow_cli/shared/models/device_model.dart';
 class HotReloadHandler {
   final HotReloadUseCase _hotReloadUseCase = HotReloadUseCase();
   final DeviceUseCase _deviceUseCase = DeviceUseCase();
-  final LocalizationService _localization = LocalizationService.instance;
   final ConfigService _configService = ConfigService.instance;
 
   Future<void> handle(List<String> args) async {

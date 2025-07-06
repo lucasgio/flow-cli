@@ -3,10 +3,8 @@ import 'package:flow_cli/features/web/domain/web_usecase.dart';
 
 void main() {
   group('WebUseCase', () {
-    late WebUseCase webUseCase;
-
     setUp(() {
-      webUseCase = WebUseCase();
+      // webUseCase = WebUseCase();
     });
 
     test('should create web log entry with correct level', () {

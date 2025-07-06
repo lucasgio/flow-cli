@@ -47,7 +47,6 @@ class ConfigUseCase {
       final defaultConfig = ConfigModel.defaultConfig();
 
       // Save the default config (this will replace the current one)
-      final originalConfig = _configService.config;
       _configService.setLanguage(defaultConfig.language);
       _configService.setMultiClient(defaultConfig.multiClient);
 

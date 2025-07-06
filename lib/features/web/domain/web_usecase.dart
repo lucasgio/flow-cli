@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'package:path/path.dart' as path;
 import 'package:flow_cli/core/utils/cli_utils.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
