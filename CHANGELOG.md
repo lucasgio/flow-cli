@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2024-07-06
+
+### Changed
+- Updated CI/CD to use official Flutter publish workflow
+- Simplified publishing process using OIDC authentication
+- Removed manual PUB_TOKEN requirement
+
 ## [1.0.2] - 2024-07-06
 
 ### Fixed

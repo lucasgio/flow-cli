@@ -132,27 +132,6 @@ jobs:
         name: flow_cli_windows
         path: flow_cli_windows.exe
 
-  publish:
-    needs: [test, build-linux, build-macos, build-windows]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Dart
-      uses: dart-lang/setup-dart@v1
-      with:
-        dart-version: stable
-    
-    - name: Install dependencies
-      run: dart pub get
-    
-    - name: Publish to pub.dev
-      run: dart pub publish --force
-      env:
-        PUB_TOKEN: ${{ secrets.PUB_TOKEN }}
-
   release:
     needs: [test, build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest

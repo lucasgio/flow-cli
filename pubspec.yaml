@@ -1,6 +1,6 @@
 name: flow_cli
 description: A comprehensive Flutter CLI tool for project management, building, and deployment
-version: 1.0.2
+version: 1.0.3
 homepage: https://github.com/flowstore/flow-cli
 repository: https://github.com/flowstore/flow-cli
 issue_tracker: https://github.com/flowstore/flow-cli/issues
