@@ -92,4 +92,9 @@ class ConfigService {
 
   bool get isConfigured =>
       _config.flutterPath != null && _config.projectPath != null;
+
+  // Testing helper
+  void resetToDefault() {
+    _config = ConfigModel.defaultConfig();
+  }
 }

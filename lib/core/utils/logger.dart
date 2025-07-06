@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:logging/logging.dart';
 
 class AppLogger {
@@ -10,8 +11,8 @@ class AppLogger {
     _logger = Logger('FlowCLI');
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen((record) {
-      // Output to console
-      print('${record.level.name}: ${record.message}');
+      // Use stderr for logging instead of print
+      stderr.writeln('${record.level.name}: ${record.message}');
     });
   }
 

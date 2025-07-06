@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:args/args.dart';
 import 'package:flow_cli/core/constants/app_constants.dart';
-import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/features/setup/presentation/setup_handler.dart';
 import 'package:flow_cli/features/build/presentation/build_handler.dart';
 import 'package:flow_cli/features/device/presentation/device_handler.dart';

@@ -27,4 +27,3 @@ dev_dependencies:
 
 executables:
   flowtest: main
-  hello: hello
