@@ -1,0 +1,44 @@
+name: Manual Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.0.3)'
+        required: true
+        default: '1.0.2'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
+      with:
+        dart-version: stable
+    
+    - name: Install dependencies
+      run: dart pub get
+    
+    - name: Verify formatting
+      run: dart format --output=none --set-exit-if-changed .
+    
+    - name: Analyze project source
+      run: dart analyze --fatal-infos
+    
+    - name: Run tests
+      run: dart test
+    
+    - name: Publish to pub.dev
+      run: dart pub publish --force
+      env:
+        PUB_TOKEN: ${{ secrets.PUB_TOKEN }}
+    
+    - name: Verify publication
+      run: |
+        echo "Waiting for package to be available..."
+        sleep 30
+        curl -s "https://pub.dev/packages/flow_cli" | grep -q "flow_cli" && echo "✅ Package published successfully!" || echo "❌ Package not yet available" 

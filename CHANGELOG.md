@@ -5,20 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2024-12-06
+## [1.0.2] - 2024-07-06
+
+### Fixed
+- Fixed executable name from `flowtest` to `flow` in pubspec.yaml
+- CLI now installs with correct command name: `flow` instead of `flowtest`
+
+## [1.0.1] - 2024-07-06
+
+### Fixed
+- Fixed missing `build` feature files in published package
+- Corrected `.pubignore` to exclude only root `/build/` directory, not `lib/features/build/`
+- All CLI commands now work correctly including `build` command
+
+## [1.0.0] - 2024-07-06
 
 ### Added
 - Initial release of Flow CLI
-- Comprehensive Flutter project management tools
-- Multi-client support for different app configurations
-- Interactive setup and configuration management
-- Build management for Android, iOS, and Web platforms
-- Device management and deployment tools
-- Hot reload with real-time logging and controls
-- Web development server with PWA support
+- Comprehensive Flutter CLI tool for project management
+- Features: setup, build, device, analyze, config, hotreload, web
+- Multi-client support
+- Localization (English/Spanish)
+- Interactive setup wizard
+- Real-time hot reload with logging
+- Web development server
+- Device management for Android and iOS
+- Configuration management
 - Analysis and optimization tools
-- Bilingual support (English and Spanish)
-- Automated asset generation for multiple clients
 
 ### Features
 - **Setup**: Interactive project initialization with multi-client support
