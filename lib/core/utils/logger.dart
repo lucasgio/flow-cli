@@ -9,7 +9,10 @@ class AppLogger {
   AppLogger._internal() {
     _logger = Logger('FlowCLI');
     Logger.root.level = Level.ALL;
-    Logger.root.onRecord.listen((record) {});
+    Logger.root.onRecord.listen((record) {
+      // Output to console
+      print('${record.level.name}: ${record.message}');
+    });
   }
 
   void info(String message) => _logger.info(message);

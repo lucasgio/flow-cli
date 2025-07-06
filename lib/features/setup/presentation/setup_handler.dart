@@ -152,7 +152,7 @@ ${_localization.translate('setup.branding_info')}
   }
 
   void _showHelp(ArgParser parser) {
-    _logger.info('''
+    print('''
 ${CliUtils.formatTitle('Flow CLI Setup')}
 
 ${_localization.translate('commands.setup')}

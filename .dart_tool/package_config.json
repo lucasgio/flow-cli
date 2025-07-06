@@ -93,9 +93,9 @@
     },
     {
       "name": "file",
-      "rootUri": "file:///Users/giosoltis/.pub-cache/hosted/pub.dev/file-6.1.4",
+      "rootUri": "file:///Users/giosoltis/.pub-cache/hosted/pub.dev/file-7.0.1",
       "packageUri": "lib/",
-      "languageVersion": "2.12"
+      "languageVersion": "3.0"
     },
     {
       "name": "frontend_server_client",
@@ -153,9 +153,9 @@
     },
     {
       "name": "lints",
-      "rootUri": "file:///Users/giosoltis/.pub-cache/hosted/pub.dev/lints-2.1.1",
+      "rootUri": "file:///Users/giosoltis/.pub-cache/hosted/pub.dev/lints-6.0.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.8"
     },
     {
       "name": "logging",
@@ -213,9 +213,9 @@
     },
     {
       "name": "process",
-      "rootUri": "file:///Users/giosoltis/.pub-cache/hosted/pub.dev/process-4.2.4",
+      "rootUri": "file:///Users/giosoltis/.pub-cache/hosted/pub.dev/process-5.0.4",
       "packageUri": "lib/",
-      "languageVersion": "2.14"
+      "languageVersion": "3.5"
     },
     {
       "name": "pub_semver",

@@ -1,5 +1,3 @@
-#!/usr/bin/env dart
-
 import 'dart:io';
 import 'package:args/args.dart';
 import 'package:flow_cli/core/constants/app_constants.dart';
@@ -33,7 +31,7 @@ Future<void> main(List<String> arguments) async {
     // Initialize localization
     await LocalizationService.instance.initialize(results['language']);
 
-    if (results['help'] || arguments.isEmpty) {
+    if (results['help'] && results.rest.isEmpty) {
       _showHelp(parser);
       return;
     }
@@ -81,9 +79,7 @@ Future<void> main(List<String> arguments) async {
 
 void _showHelp(ArgParser parser) {
   final localization = LocalizationService.instance;
-  final logger = AppLogger.instance;
-
-  logger.info('''
+  print('''
 ${CliUtils.formatTitle('Flow CLI v${AppConstants.version}')}
 
 ${localization.translate('help.description')}
@@ -117,6 +113,5 @@ ${localization.translate('help.more_info')}
 }
 
 void _showVersion() {
-  final logger = AppLogger.instance;
-  logger.info('Flow CLI v${AppConstants.version}');
+  print('Flow CLI v${AppConstants.version}');
 }
