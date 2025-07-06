@@ -78,7 +78,7 @@ Future<void> main(List<String> arguments) async {
 
 void _showHelp(ArgParser parser) {
   final localization = LocalizationService.instance;
-  print('''
+  CliUtils.printInfo('''
 ${CliUtils.formatTitle('Flow CLI v${AppConstants.version}')}
 
 ${localization.translate('help.description')}
@@ -112,5 +112,5 @@ ${localization.translate('help.more_info')}
 }
 
 void _showVersion() {
-  print('Flow CLI v${AppConstants.version}');
+  CliUtils.printInfo('Flow CLI v${AppConstants.version}');
 }
