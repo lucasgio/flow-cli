@@ -46,7 +46,7 @@ void main() {
     test('should check if configured', () {
       // Reset to default state for this test
       configService.resetToDefault();
-      
+
       expect(configService.isConfigured, equals(false));
 
       configService.setFlutterPath('/test/flutter');
