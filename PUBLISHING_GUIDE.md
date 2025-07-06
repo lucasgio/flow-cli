@@ -1,168 +1,179 @@
 # Flow CLI Publishing Guide
 
-This document outlines the requirements and process for publishing the Flow CLI package to pub.dev.
+Este documento describe los requisitos y el proceso para publicar el paquete Flow CLI en pub.dev.
 
-## Changes Made for Publishing
+## Cambios Realizados para la Publicación
 
-### 1. Added Required Files
+### 1. Archivos Requeridos Agregados
 
-- **LICENSE**: MIT License file (required for all packages)
-- **CHANGELOG.md**: Version history tracking
-- **.pubignore**: Excludes large files and unnecessary content from the published package
+- **LICENSE**: Archivo de licencia MIT (requerido para todos los paquetes)
+- **CHANGELOG.md**: Seguimiento del historial de versiones
+- **.pubignore**: Excluye archivos grandes y contenido innecesario del paquete publicado
 
-### 2. Updated pubspec.yaml
+### 2. pubspec.yaml Actualizado
 
-Added required metadata fields:
-- `repository`: GitHub repository URL
-- `issue_tracker`: GitHub issues URL  
-- `documentation`: README link
+Agregados campos de metadatos requeridos:
+- `repository`: URL del repositorio de GitHub
+- `issue_tracker`: URL de issues de GitHub  
+- `documentation`: Enlace al README
 
-### 3. Fixed CI/CD Workflow
+### 3. Workflows de CI/CD Corregidos
 
-- **Build Matrix**: Now builds executables for all platforms (Linux, macOS, Windows)
-- **Artifact Management**: Proper artifact upload/download for release assets
-- **Release Assets**: All platform executables are uploaded to GitHub releases
-- **Publishing**: Automated publishing to pub.dev on release
+- **Matriz de Build**: Ahora construye ejecutables para todas las plataformas (Linux, macOS, Windows)
+- **Gestión de Artefactos**: Carga/descarga correcta de artefactos para assets de release
+- **Assets de Release**: Todos los ejecutables de plataforma se suben a releases de GitHub
+- **Publicación**: Publicación automatizada a pub.dev en release
 
-## Workflow Issues Fixed ✅
+## Problemas de Workflow Solucionados ✅
 
-### Problem: Build and Publish Jobs Not Running
+### Problema: Los Jobs de Build Se Saltan
 
-**Issue**: The original workflow had a matrix strategy that wasn't working properly for the build job.
+**Problema**: Los jobs de build solo se ejecutaban en eventos de `release`, por lo que se saltaban durante el desarrollo normal.
 
-**Solution**: 
-- Split the single `build` job into three separate jobs: `build-linux`, `build-macos`, `build-windows`
-- Each job runs on its specific platform
-- Fixed artifact naming and download process
-- Added manual workflow for testing
+**Solución**: 
+- Modificadas las condiciones de los jobs de build para ejecutarse en más eventos
+- Creado un workflow dedicado de build que siempre ejecuta los jobs
+- Agregadas condiciones para ejecutar en `main` branch y releases
 
-### Workflow Structure
+### Estructura de Workflows
 
-#### Main CI/CD Workflow (`.github/workflows/ci.yml`)
-- **Triggers**: Push to main/develop, PR to main, Release published
+#### Workflow Principal de CI/CD (`.github/workflows/ci.yml`)
+- **Triggers**: Push a main/develop, PR a main, Release publicado
 - **Jobs**:
-  - `test`: Runs on all platforms with multiple Dart versions
-  - `build-linux`: Builds Linux executable (release only)
-  - `build-macos`: Builds macOS executable (release only)
-  - `build-windows`: Builds Windows executable (release only)
-  - `publish`: Publishes to pub.dev (release only)
-  - `release`: Creates GitHub release assets (release only)
+  - `test`: Se ejecuta en todas las plataformas con múltiples versiones de Dart
+  - `build-linux`: Construye ejecutable de Linux (main branch + release)
+  - `build-macos`: Construye ejecutable de macOS (main branch + release)
+  - `build-windows`: Construye ejecutable de Windows (main branch + release)
+  - `publish`: Publica a pub.dev (solo release)
+  - `release`: Crea assets de GitHub release (solo release)
 
-#### Manual Workflow (`.github/workflows/manual-publish.yml`)
+#### Workflow de Build Dedicado (`.github/workflows/build.yml`)
+- **Triggers**: Push a main/develop, PR a main, Manual dispatch
+- **Propósito**: Siempre ejecuta los jobs de build para desarrollo y testing
+- **Ventajas**: Garantiza que los builds se ejecuten en cada commit
+
+#### Workflow Manual (`.github/workflows/manual-publish.yml`)
 - **Triggers**: Manual workflow dispatch
-- **Purpose**: Test build and publish without creating a release
-- **Options**: Can choose to publish to pub.dev or just build executables
+- **Propósito**: Probar build y publicación sin crear un release
+- **Opciones**: Puede elegir publicar a pub.dev o solo construir ejecutables
 
-## Publishing Requirements ✅
+## Requisitos de Publicación ✅
 
-Based on the [Dart publishing documentation](https://dart.dev/tools/pub/publishing), all requirements are met:
+Basado en la [documentación de publicación de Dart](https://dart.dev/tools/pub/publishing), todos los requisitos están cumplidos:
 
-### ✅ Required Files
-- [x] LICENSE file (MIT License)
-- [x] Valid pubspec.yaml with complete metadata
-- [x] README.md with comprehensive documentation
-- [x] CHANGELOG.md for version tracking
+### ✅ Archivos Requeridos
+- [x] Archivo LICENSE (Licencia MIT)
+- [x] pubspec.yaml válido con metadatos completos
+- [x] README.md con documentación completa
+- [x] CHANGELOG.md para seguimiento de versiones
 
-### ✅ Package Structure
-- [x] Follows Dart package conventions
-- [x] Proper directory structure (lib/, bin/, test/)
-- [x] Executable defined in pubspec.yaml
-- [x] Analysis passes without issues
+### ✅ Estructura del Paquete
+- [x] Sigue las convenciones de paquetes de Dart
+- [x] Estructura de directorios apropiada (lib/, bin/, test/)
+- [x] Ejecutable definido en pubspec.yaml
+- [x] Análisis pasa sin problemas
 
-### ✅ Size and Content
-- [x] Package size under 100MB (current: 37KB compressed)
-- [x] .pubignore excludes large files (flow executable, build artifacts)
-- [x] Only hosted dependencies from default pub server
-- [x] No unnecessary files included
+### ✅ Tamaño y Contenido
+- [x] Tamaño del paquete bajo 100MB (actual: 37KB comprimido)
+- [x] .pubignore excluye archivos grandes (ejecutable flow, artefactos de build)
+- [x] Solo dependencias alojadas del servidor pub por defecto
+- [x] No se incluyen archivos innecesarios
 
-### ✅ CI/CD Pipeline
-- [x] Automated testing on multiple platforms
-- [x] Code formatting and analysis checks
-- [x] Build verification for all platforms
-- [x] Automated publishing to pub.dev
-- [x] GitHub release asset creation
+### ✅ Pipeline de CI/CD
+- [x] Testing automatizado en múltiples plataformas
+- [x] Verificación de formato y análisis de código
+- [x] Verificación de build para todas las plataformas
+- [x] Publicación automatizada a pub.dev
+- [x] Creación de assets de GitHub release
 
-## Publishing Process
+## Proceso de Publicación
 
-### Manual Publishing
+### Publicación Manual
 ```bash
-# Test the package
+# Probar el paquete
 dart pub publish --dry-run
 
-# Publish to pub.dev (requires PUB_TOKEN)
+# Publicar a pub.dev (requiere PUB_TOKEN)
 dart pub publish --force
 ```
 
-### Automated Publishing
-The package will be automatically published when:
-1. A GitHub release is created
-2. All CI/CD tests pass
-3. The `PUB_TOKEN` secret is configured in GitHub
+### Publicación Automatizada
+El paquete se publicará automáticamente cuando:
+1. Se cree un GitHub release
+2. Todas las pruebas de CI/CD pasen
+3. El secreto `PUB_TOKEN` esté configurado en GitHub
 
-### Manual Workflow Testing
-To test the build and publish process without creating a release:
+### Testing de Workflows
 
-1. Go to GitHub repository → Actions
-2. Select "Manual Publish" workflow
-3. Click "Run workflow"
-4. Choose whether to publish to pub.dev or just build executables
-5. Click "Run workflow"
+#### Workflow de Build Automático
+- Se ejecuta automáticamente en cada push a `main` o `develop`
+- Construye ejecutables para todas las plataformas
+- Sube artefactos para descarga
 
-This allows you to:
-- Test the build process on all platforms
-- Verify executables are created correctly
-- Test publishing without creating a release
-- Debug any workflow issues
+#### Workflow Manual
+Para probar el proceso de build y publicación sin crear un release:
 
-## Required Secrets
+1. Ve a GitHub repository → Actions
+2. Selecciona "Manual Publish" workflow
+3. Haz clic en "Run workflow"
+4. Elige si publicar a pub.dev o solo construir ejecutables
+5. Haz clic en "Run workflow"
 
-### GitHub Repository Secrets
-- `PUB_TOKEN`: Your pub.dev authentication token
+Esto te permite:
+- Probar el proceso de build en todas las plataformas
+- Verificar que los ejecutables se crean correctamente
+- Probar la publicación sin crear un release
+- Debuggear cualquier problema del workflow
 
-### How to Get PUB_TOKEN
-1. Go to https://pub.dev
-2. Sign in with your Google account
-3. Go to your profile settings
-4. Generate an API token
-5. Add it to your GitHub repository secrets
+## Secretos Requeridos
 
-## Version Management
+### Secretos del Repositorio de GitHub
+- `PUB_TOKEN`: Tu token de autenticación de pub.dev
 
-### Semantic Versioning
-- **MAJOR.MINOR.PATCH** format
-- Update version in `pubspec.yaml`
-- Document changes in `CHANGELOG.md`
-- Create GitHub release with matching version tag
+### Cómo Obtener PUB_TOKEN
+1. Ve a https://pub.dev
+2. Inicia sesión con tu cuenta de Google
+3. Ve a la configuración de tu perfil
+4. Genera un token de API
+5. Agrégarlo a los secretos de tu repositorio de GitHub
 
-### Release Process
-1. Update version in `pubspec.yaml`
-2. Update `CHANGELOG.md` with new version
-3. Commit and push changes
-4. Create GitHub release with version tag
-5. CI/CD will automatically:
-   - Run tests
-   - Build executables
-   - Publish to pub.dev
-   - Upload release assets
+## Gestión de Versiones
 
-## Package Information
+### Versionado Semántico
+- Formato **MAJOR.MINOR.PATCH**
+- Actualizar versión en `pubspec.yaml`
+- Documentar cambios en `CHANGELOG.md`
+- Crear GitHub release con tag de versión coincidente
 
-- **Name**: flow_cli
-- **Description**: A comprehensive Flutter CLI tool for project management, building, and deployment
-- **Homepage**: https://github.com/Flowstore/flow-cli
-- **License**: MIT
+### Proceso de Release
+1. Actualizar versión en `pubspec.yaml`
+2. Actualizar `CHANGELOG.md` con nueva versión
+3. Commit y push de cambios
+4. Crear GitHub release con tag de versión
+5. CI/CD automáticamente:
+   - Ejecutará pruebas
+   - Construirá ejecutables
+   - Publicará a pub.dev
+   - Subirá assets de release
+
+## Información del Paquete
+
+- **Nombre**: flow_cli
+- **Descripción**: Una herramienta CLI completa de Flutter para gestión de proyectos, construcción y despliegue
+- **Página de inicio**: https://github.com/Flowstore/flow-cli
+- **Licencia**: MIT
 - **SDK**: >=3.0.0 <4.0.0
-- **Executable**: flow
+- **Ejecutable**: flow
 
-## Installation
+## Instalación
 
-After publishing, users can install the package with:
+Después de la publicación, los usuarios pueden instalar el paquete con:
 ```bash
 dart pub global activate flow_cli
 ```
 
-## Support
+## Soporte
 
 - **Issues**: https://github.com/Flowstore/flow-cli/issues
-- **Documentation**: https://github.com/Flowstore/flow-cli#readme
-- **Repository**: https://github.com/Flowstore/flow-cli 
+- **Documentación**: https://github.com/Flowstore/flow-cli#readme
+- **Repositorio**: https://github.com/Flowstore/flow-cli 
