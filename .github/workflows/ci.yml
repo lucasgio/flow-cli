@@ -3,6 +3,8 @@ name: CI/CD
 on:
   push:
     branches: [ main, develop ]
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
   pull_request:
     branches: [ main ]
   release:
@@ -131,6 +133,95 @@ jobs:
       with:
         name: flow_cli_windows
         path: flow_cli_windows.exe
+
+  tag-release:
+    needs: test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
+      with:
+        dart-version: stable
+    
+    - name: Install dependencies
+      run: dart pub get
+    
+    - name: Build Linux executable
+      run: dart compile exe bin/main.dart -o flow_cli_linux
+      shell: bash
+    
+    - name: Build macOS executable
+      run: dart compile exe bin/main.dart -o flow_cli_macos
+      shell: bash
+    
+    - name: Build Windows executable
+      run: dart compile exe bin/main.dart -o flow_cli_windows.exe
+      shell: bash
+    
+    - name: Extract version from tag
+      id: version
+      run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+    
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version.outputs.version }}
+        release_name: Flow CLI ${{ steps.version.outputs.version }}
+        body: |
+          ## Flow CLI ${{ steps.version.outputs.version }}
+          
+          ### Installation
+          ```bash
+          dart pub global activate flow_cli
+          ```
+          
+          ### Usage
+          ```bash
+          flow --help
+          ```
+          
+          ### Downloads
+          - **Linux**: flow_cli_linux
+          - **macOS**: flow_cli_macos  
+          - **Windows**: flow_cli_windows.exe
+        draft: false
+        prerelease: false
+    
+    - name: Upload Linux Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./flow_cli_linux
+        asset_name: flow_cli_linux
+        asset_content_type: application/octet-stream
+    
+    - name: Upload macOS Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./flow_cli_macos
+        asset_name: flow_cli_macos
+        asset_content_type: application/octet-stream
+    
+    - name: Upload Windows Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./flow_cli_windows.exe
+        asset_name: flow_cli_windows.exe
+        asset_content_type: application/octet-stream
 
   release:
     needs: [test, build-linux, build-macos, build-windows]
