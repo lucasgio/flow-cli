@@ -2,12 +2,13 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'package:path/path.dart' as path;
-import 'package:flow_cli/core/utils/cli_utils.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/shared/models/device_model.dart';
 
 class HotReloadUseCase {
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<HotReloadSession?> startSession({
     required DeviceModel device,
@@ -36,8 +37,8 @@ class HotReloadUseCase {
         args.add('--verbose');
       }
 
-      CliUtils.printInfo('Starting Flutter app with hot reload...');
-      CliUtils.printInfo('Command: flutter ${args.join(' ')}');
+      _logger.info('Starting Flutter app with hot reload...');
+      _logger.info('Command: flutter ${args.join(' ')}');
 
       // Start the Flutter process
       final process = await Process.start(
@@ -55,18 +56,18 @@ class HotReloadUseCase {
       );
 
       // Wait a bit to ensure the app starts
-      await Future.delayed(Duration(seconds: 3));
+      await Future.delayed(const Duration(seconds: 3));
 
       // Check if process is still running
       if (await _isProcessRunning(process)) {
-        CliUtils.printSuccess('Hot reload session started successfully');
+        _logger.info('Hot reload session started successfully');
         return session;
       } else {
-        CliUtils.printError('Failed to start Flutter app');
+        _logger.error('Failed to start Flutter app');
         return null;
       }
     } catch (e) {
-      CliUtils.printError('Error starting hot reload session: $e');
+      _logger.error('Error starting hot reload session: $e');
       return null;
     }
   }
@@ -87,7 +88,7 @@ class HotReloadUseCase {
     // Listen to stdout
     session.process.stdout
         .transform(utf8.decoder)
-        .transform(LineSplitter())
+        .transform(const LineSplitter())
         .listen((line) {
       if (line.trim().isNotEmpty) {
         final logEntry = _parseLogLine(line, 'stdout');
@@ -98,7 +99,7 @@ class HotReloadUseCase {
     // Listen to stderr
     session.process.stderr
         .transform(utf8.decoder)
-        .transform(LineSplitter())
+        .transform(const LineSplitter())
         .listen((line) {
       if (line.trim().isNotEmpty) {
         final logEntry = _parseLogLine(line, 'stderr');
@@ -165,11 +166,11 @@ class HotReloadUseCase {
       await session.process.stdin.flush();
 
       // Wait a bit for the reload to process
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
 
       return true;
     } catch (e) {
-      CliUtils.printError('Hot reload error: $e');
+      _logger.error('Hot reload error: $e');
       return false;
     }
   }
@@ -181,11 +182,11 @@ class HotReloadUseCase {
       await session.process.stdin.flush();
 
       // Wait a bit for the restart to process
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
 
       return true;
     } catch (e) {
-      CliUtils.printError('Hot restart error: $e');
+      _logger.error('Hot restart error: $e');
       return false;
     }
   }
@@ -210,7 +211,7 @@ class HotReloadUseCase {
 
       return null;
     } catch (e) {
-      CliUtils.printError('Screenshot capture error: $e');
+      _logger.error('Screenshot capture error: $e');
       return null;
     }
   }
@@ -278,7 +279,7 @@ class HotReloadUseCase {
       session.process.stdin.writeln('P');
       await session.process.stdin.flush();
     } catch (e) {
-      CliUtils.printError('Failed to enable performance overlay: $e');
+      _logger.error('Failed to enable performance overlay: $e');
     }
   }
 
@@ -288,7 +289,7 @@ class HotReloadUseCase {
       session.process.stdin.writeln('p');
       await session.process.stdin.flush();
     } catch (e) {
-      CliUtils.printError('Failed to toggle debug paint: $e');
+      _logger.error('Failed to toggle debug paint: $e');
     }
   }
 
@@ -298,7 +299,7 @@ class HotReloadUseCase {
       session.process.stdin.writeln('w');
       await session.process.stdin.flush();
     } catch (e) {
-      CliUtils.printError('Failed to toggle widget inspector: $e');
+      _logger.error('Failed to toggle widget inspector: $e');
     }
   }
 
@@ -350,7 +351,7 @@ class HotReloadSession {
       await process.stdin.flush();
 
       // Wait a bit for graceful shutdown
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
 
       // Force kill if still running
       if (!process.kill()) {

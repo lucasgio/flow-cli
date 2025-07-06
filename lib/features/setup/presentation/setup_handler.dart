@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:interact/interact.dart';
 import 'package:flow_cli/core/utils/cli_utils.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/shared/services/localization_service.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
 import 'package:flow_cli/features/setup/domain/setup_usecase.dart';
@@ -10,6 +11,7 @@ class SetupHandler {
   final SetupUseCase _setupUseCase = SetupUseCase();
   final LocalizationService _localization = LocalizationService.instance;
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<void> handle(List<String> args) async {
     final parser = ArgParser()
@@ -65,7 +67,7 @@ class SetupHandler {
   Future<void> _setupMultiClient() async {
     CliUtils.printInfo(_localization.translate('setup.multi_client_guide'));
 
-    print('''
+    _logger.info('''
 ${_localization.translate('setup.folder_structure')}
 
 assets/
@@ -95,12 +97,12 @@ ${_localization.translate('setup.branding_info')}
   }
 
   Future<void> _configureLanguage() async {
-    final language = Select(
+    final languageIndex = Select(
       prompt: 'Select language / Seleccionar idioma:',
       options: ['English', 'Español'],
     ).interact();
 
-    final langCode = language == 'English' ? 'en' : 'es';
+    final langCode = languageIndex == 0 ? 'en' : 'es';
     await _localization.initialize(langCode);
     _configService.setLanguage(langCode);
   }
@@ -150,7 +152,7 @@ ${_localization.translate('setup.branding_info')}
   }
 
   void _showHelp(ArgParser parser) {
-    print('''
+    _logger.info('''
 ${CliUtils.formatTitle('Flow CLI Setup')}
 
 ${_localization.translate('commands.setup')}

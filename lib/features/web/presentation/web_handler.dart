@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:interact/interact.dart';
 import 'package:flow_cli/core/utils/cli_utils.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/shared/services/localization_service.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
 import 'package:flow_cli/features/web/domain/web_usecase.dart';
@@ -11,6 +12,7 @@ class WebHandler {
   final WebUseCase _webUseCase = WebUseCase();
   final LocalizationService _localization = LocalizationService.instance;
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<void> handle(List<String> args) async {
     final parser = ArgParser()
@@ -97,10 +99,10 @@ class WebHandler {
       exit(1);
     }
 
-    CliUtils.printInfo('Starting Flutter web development server...');
-    CliUtils.printInfo('Port: $port');
-    CliUtils.printInfo('Hostname: $hostname');
-    if (client != null) CliUtils.printInfo('Client: $client');
+    _logger.info('Starting Flutter web development server...');
+    _logger.info('Port: $port');
+    _logger.info('Hostname: $hostname');
+    if (client != null) _logger.info('Client: $client');
 
     // Start the development server
     final serverSession = await _webUseCase.startDevelopmentServer(
@@ -112,7 +114,7 @@ class WebHandler {
     );
 
     if (serverSession == null) {
-      CliUtils.printError('Failed to start development server');
+      _logger.error('Failed to start development server');
       exit(1);
     }
 
@@ -158,13 +160,13 @@ class WebHandler {
           await _showPerformanceStats(serverSession);
           break;
         case 'q':
-          CliUtils.printInfo('Stopping web development server...');
+          _logger.info('Stopping web development server...');
           await serverSession.stop();
           await logSubscription.cancel();
           await keyboardSubscription.cancel();
           stdin.echoMode = true;
           stdin.lineMode = true;
-          CliUtils.printSuccess('Web development server stopped');
+          _logger.info('Web development server stopped');
           return;
       }
     });
@@ -199,16 +201,18 @@ class WebHandler {
     }
 
     String buildMode = 'debug';
-    if (release)
+    if (release) {
       buildMode = 'release';
-    else if (profile) buildMode = 'profile';
+    } else if (profile) {
+      buildMode = 'profile';
+    }
 
-    CliUtils.printInfo('Building Flutter web app...');
-    CliUtils.printInfo('Build mode: $buildMode');
-    CliUtils.printInfo('Output directory: $output');
-    if (client != null) CliUtils.printInfo('Client: $client');
-    if (pwa) CliUtils.printInfo('PWA features enabled');
-    if (wasm) CliUtils.printInfo('WebAssembly compilation enabled');
+    _logger.info('Building Flutter web app...');
+    _logger.info('Build mode: $buildMode');
+    _logger.info('Output directory: $output');
+    if (client != null) _logger.info('Client: $client');
+    if (pwa) _logger.info('PWA features enabled');
+    if (wasm) _logger.info('WebAssembly compilation enabled');
 
     final success = await _webUseCase.buildWeb(
       buildMode: buildMode,
@@ -222,13 +226,13 @@ class WebHandler {
     );
 
     if (success) {
-      CliUtils.printSuccess('Web build completed successfully!');
-      CliUtils.printInfo('Output location: $output');
+      _logger.info('Web build completed successfully!');
+      _logger.info('Output location: $output');
 
       // Show build analysis
       await _analyzeBuildOutput(output);
     } else {
-      CliUtils.printError('Web build failed');
+      _logger.error('Web build failed');
       exit(1);
     }
   }
@@ -243,7 +247,7 @@ class WebHandler {
       exit(1);
     }
 
-    CliUtils.printInfo('Preparing web deployment...');
+    _logger.info('Preparing web deployment...');
 
     // Show deployment options
     final platforms = [
@@ -270,10 +274,10 @@ class WebHandler {
   Future<void> _analyzeWeb(ArgResults results) async {
     final output = results['output'] as String;
 
-    CliUtils.printInfo('Analyzing web build...');
+    _logger.info('Analyzing web build...');
 
     if (!Directory(output).existsSync()) {
-      CliUtils.printWarning('Build output not found. Building first...');
+      _logger.warning('Build output not found. Building first...');
       await _buildWeb(results);
     }
 
@@ -282,25 +286,25 @@ class WebHandler {
   }
 
   Future<void> _configurePWA(ArgResults results) async {
-    CliUtils.printInfo('Configuring Progressive Web App (PWA) features...');
+    _logger.info('Configuring Progressive Web App (PWA) features...');
 
     final pwaConfig = await _webUseCase.generatePWAConfig();
 
     if (pwaConfig != null) {
-      CliUtils.printSuccess('PWA configuration generated successfully!');
-      CliUtils.printInfo('Files created:');
-      CliUtils.printInfo('  - web/manifest.json');
-      CliUtils.printInfo('  - web/sw.js (Service Worker)');
-      CliUtils.printInfo('  - web/icons/ (PWA icons)');
+      _logger.info('PWA configuration generated successfully!');
+      _logger.info('Files created:');
+      _logger.info('  - web/manifest.json');
+      _logger.info('  - web/sw.js (Service Worker)');
+      _logger.info('  - web/icons/ (PWA icons)');
     } else {
-      CliUtils.printError('Failed to generate PWA configuration');
+      _logger.error('Failed to generate PWA configuration');
     }
   }
 
   Future<void> _optimizeWeb(ArgResults results) async {
     final output = results['output'] as String;
 
-    CliUtils.printInfo('Optimizing web build...');
+    _logger.info('Optimizing web build...');
 
     if (!Directory(output).existsSync()) {
       CliUtils.printError('Build output not found: $output');
@@ -310,29 +314,29 @@ class WebHandler {
 
     final optimizations = await _webUseCase.optimizeWebBuild(output);
 
-    CliUtils.printSuccess('Web optimization completed!');
-    CliUtils.printInfo('Optimizations applied:');
+    _logger.info('Web optimization completed!');
+    _logger.info('Optimizations applied:');
     for (final optimization in optimizations) {
-      CliUtils.printInfo('  ✓ $optimization');
+      _logger.info('  ✓ $optimization');
     }
   }
 
   void _printWebServerInstructions(String hostname, int port) {
-    print('\n${CliUtils.formatTitle('Flutter Web Development Server')}');
+    _logger.info('\n${CliUtils.formatTitle('Flutter Web Development Server')}');
     CliUtils.printSeparator();
-    print('🌐 Server running at: http://$hostname:$port');
+    _logger.info('🌐 Server running at: http://$hostname:$port');
     CliUtils.printSeparator();
-    print('${CliUtils.formatSubtitle('Commands:')}');
-    print('  r  - Hot reload');
-    print('  R  - Hot restart');
-    print('  o  - Open in browser');
-    print('  h  - Show this help');
-    print('  c  - Clear console');
-    print('  l  - Show logs');
-    print('  p  - Performance stats');
-    print('  q  - Quit server');
+    _logger.info(CliUtils.formatSubtitle('Commands:'));
+    _logger.info('  r  - Hot reload');
+    _logger.info('  R  - Hot restart');
+    _logger.info('  o  - Open in browser');
+    _logger.info('  h  - Show this help');
+    _logger.info('  c  - Clear console');
+    _logger.info('  l  - Show logs');
+    _logger.info('  p  - Performance stats');
+    _logger.info('  q  - Quit server');
     CliUtils.printSeparator();
-    print('');
+    _logger.info('');
   }
 
   void _printWebLogEntry(WebLogEntry logEntry, bool verbose) {
@@ -345,19 +349,19 @@ class WebHandler {
 
     switch (logEntry.level.toLowerCase()) {
       case 'error':
-        print('\x1b[31m$formattedMessage\x1b[0m');
+        _logger.error('\x1b[31m$formattedMessage\x1b[0m');
         break;
       case 'warning':
-        print('\x1b[33m$formattedMessage\x1b[0m');
+        _logger.warning('\x1b[33m$formattedMessage\x1b[0m');
         break;
       case 'info':
-        print('\x1b[34m$formattedMessage\x1b[0m');
+        _logger.info('\x1b[34m$formattedMessage\x1b[0m');
         break;
       case 'debug':
-        print('\x1b[90m$formattedMessage\x1b[0m');
+        _logger.debug('\x1b[90m$formattedMessage\x1b[0m');
         break;
       default:
-        print(formattedMessage);
+        _logger.info(formattedMessage);
     }
   }
 
@@ -387,10 +391,10 @@ class WebHandler {
     CliUtils.clearLine();
 
     if (success) {
-      CliUtils.printSuccess(
+      _logger.info(
           '⚡ Web reload completed in ${stopwatch.elapsedMilliseconds}ms');
     } else {
-      CliUtils.printError('❌ Web reload failed');
+      _logger.error('❌ Web reload failed');
     }
   }
 
@@ -405,10 +409,10 @@ class WebHandler {
     CliUtils.clearLine();
 
     if (success) {
-      CliUtils.printSuccess(
+      _logger.info(
           '🔄 Web restart completed in ${stopwatch.elapsedMilliseconds}ms');
     } else {
-      CliUtils.printError('❌ Web restart failed');
+      _logger.error('❌ Web restart failed');
     }
   }
 
@@ -424,9 +428,9 @@ class WebHandler {
         await Process.run('xdg-open', [url]);
       }
 
-      CliUtils.printSuccess('Browser opened: $url');
+      _logger.info('Browser opened: $url');
     } catch (e) {
-      CliUtils.printError('Failed to open browser: $e');
+      _logger.error('Failed to open browser: $e');
     }
   }
 
@@ -440,21 +444,21 @@ class WebHandler {
   }
 
   Future<void> _showWebLogs(WebServerSession session) async {
-    CliUtils.printInfo('📊 Web Server Logs:');
+    _logger.info('📊 Web Server Logs:');
     // Implementation would show recent logs
   }
 
   Future<void> _showPerformanceStats(WebServerSession session) async {
     final stats = await _webUseCase.getPerformanceStats(session);
 
-    print('\n${CliUtils.formatTitle('Performance Statistics')}');
+    _logger.info('\n${CliUtils.formatTitle('Performance Statistics')}');
     CliUtils.printSeparator();
-    print('Uptime: ${stats['uptime']}');
-    print('Requests served: ${stats['requests']}');
-    print('Build time: ${stats['buildTime']}ms');
-    print('Bundle size: ${stats['bundleSize']}');
+    _logger.info('Uptime: ${stats['uptime']}');
+    _logger.info('Requests served: ${stats['requests']}');
+    _logger.info('Build time: ${stats['buildTime']}ms');
+    _logger.info('Bundle size: ${stats['bundleSize']}');
     CliUtils.printSeparator();
-    print('');
+    _logger.info('');
   }
 
   Future<void> _analyzeBuildOutput(String outputDir) async {
@@ -463,7 +467,7 @@ class WebHandler {
   }
 
   void _printWebAnalysis(Map<String, dynamic> analysis) {
-    print('\n${CliUtils.formatTitle('Web Build Analysis')}');
+    _logger.info('\n${CliUtils.formatTitle('Web Build Analysis')}');
     CliUtils.printSeparator();
 
     final bundleSize = analysis['bundleSize'] as String? ?? 'Unknown';
@@ -471,19 +475,19 @@ class WebHandler {
     final loadTime = analysis['estimatedLoadTime'] as String? ?? 'Unknown';
     final recommendations = analysis['recommendations'] as List<String>? ?? [];
 
-    print('📦 Bundle size: $bundleSize');
-    print('📄 Asset count: $assetCount');
-    print('⚡ Estimated load time: $loadTime');
+    _logger.info('📦 Bundle size: $bundleSize');
+    _logger.info('📄 Asset count: $assetCount');
+    _logger.info('⚡ Estimated load time: $loadTime');
 
     if (recommendations.isNotEmpty) {
-      print('\n${CliUtils.formatSubtitle('Optimization Recommendations:')}');
+      _logger.info('\n${CliUtils.formatSubtitle('Optimization Recommendations:')}');
       for (final rec in recommendations) {
         CliUtils.printInfo(rec);
       }
     }
 
     CliUtils.printSeparator();
-    print('');
+    _logger.info('');
   }
 
   Future<void> _deployToPlatform(
@@ -514,99 +518,99 @@ class WebHandler {
   }
 
   Future<void> _deployToFirebase(String output, String? client) async {
-    CliUtils.printInfo('🔥 Deploying to Firebase Hosting...');
+    _logger.info('🔥 Deploying to Firebase Hosting...');
 
     final success = await _webUseCase.deployToFirebase(output, client);
 
     if (success) {
-      CliUtils.printSuccess('🔥 Successfully deployed to Firebase Hosting!');
+      _logger.info('🔥 Successfully deployed to Firebase Hosting!');
     } else {
-      CliUtils.printError('Firebase deployment failed');
+      _logger.error('Firebase deployment failed');
     }
   }
 
   Future<void> _deployToNetlify(String output, String? client) async {
-    CliUtils.printInfo('🌐 Deploying to Netlify...');
+    _logger.info('🌐 Deploying to Netlify...');
 
     final success = await _webUseCase.deployToNetlify(output, client);
 
     if (success) {
-      CliUtils.printSuccess('🌐 Successfully deployed to Netlify!');
+      _logger.info('🌐 Successfully deployed to Netlify!');
     } else {
-      CliUtils.printError('Netlify deployment failed');
+      _logger.error('Netlify deployment failed');
     }
   }
 
   Future<void> _deployToVercel(String output, String? client) async {
-    CliUtils.printInfo('▲ Deploying to Vercel...');
+    _logger.info('▲ Deploying to Vercel...');
 
     final success = await _webUseCase.deployToVercel(output, client);
 
     if (success) {
-      CliUtils.printSuccess('▲ Successfully deployed to Vercel!');
+      _logger.info('▲ Successfully deployed to Vercel!');
     } else {
-      CliUtils.printError('Vercel deployment failed');
+      _logger.error('Vercel deployment failed');
     }
   }
 
   Future<void> _deployToGitHubPages(String output, String? client) async {
-    CliUtils.printInfo('📄 Deploying to GitHub Pages...');
+    _logger.info('📄 Deploying to GitHub Pages...');
 
     final success = await _webUseCase.deployToGitHubPages(output, client);
 
     if (success) {
-      CliUtils.printSuccess('📄 Successfully deployed to GitHub Pages!');
+      _logger.info('📄 Successfully deployed to GitHub Pages!');
     } else {
-      CliUtils.printError('GitHub Pages deployment failed');
+      _logger.error('GitHub Pages deployment failed');
     }
   }
 
   Future<void> _deployToAWS(String output, String? client) async {
-    CliUtils.printInfo('☁️ Deploying to AWS S3...');
+    _logger.info('☁️ Deploying to AWS S3...');
 
     final success = await _webUseCase.deployToAWS(output, client);
 
     if (success) {
-      CliUtils.printSuccess('☁️ Successfully deployed to AWS S3!');
+      _logger.info('☁️ Successfully deployed to AWS S3!');
     } else {
-      CliUtils.printError('AWS S3 deployment failed');
+      _logger.error('AWS S3 deployment failed');
     }
   }
 
   Future<void> _deployToCustomServer(String output, String? client) async {
-    CliUtils.printInfo('🖥️ Deploying to custom server...');
+    _logger.info('🖥️ Deploying to custom server...');
 
     final success = await _webUseCase.deployToCustomServer(output, client);
 
     if (success) {
-      CliUtils.printSuccess('🖥️ Successfully deployed to custom server!');
+      _logger.info('🖥️ Successfully deployed to custom server!');
     } else {
-      CliUtils.printError('Custom server deployment failed');
+      _logger.error('Custom server deployment failed');
     }
   }
 
   Future<void> _showManualDeployment(String output, String? client) async {
-    print('\n${CliUtils.formatTitle('Manual Deployment Instructions')}');
+    _logger.info('\n${CliUtils.formatTitle('Manual Deployment Instructions')}');
     CliUtils.printSeparator();
-    print('Build output location: $output');
-    print('');
-    print('${CliUtils.formatSubtitle('Deploy to any web hosting:')}');
-    print('1. Copy all files from: $output');
-    print('2. Upload to your web server\'s public directory');
-    print('3. Ensure your server supports SPA routing (optional)');
-    print('4. Configure HTTPS (recommended)');
-    print('');
-    print('${CliUtils.formatSubtitle('Important files:')}');
-    print('  • index.html - Main entry point');
-    print('  • main.dart.js - Flutter web engine');
-    print('  • assets/ - App assets and resources');
-    print('  • manifest.json - PWA configuration (if enabled)');
+    _logger.info('Build output location: $output');
+    _logger.info('');
+    _logger.info(CliUtils.formatSubtitle('Deploy to any web hosting:'));
+    _logger.info('1. Copy all files from: $output');
+    _logger.info('2. Upload to your web server\'s public directory');
+    _logger.info('3. Ensure your server supports SPA routing (optional)');
+    _logger.info('4. Configure HTTPS (recommended)');
+    _logger.info('');
+    _logger.info(CliUtils.formatSubtitle('Important files:'));
+    _logger.info('  • index.html - Main entry point');
+    _logger.info('  • main.dart.js - Flutter web engine');
+    _logger.info('  • assets/ - App assets and resources');
+    _logger.info('  • manifest.json - PWA configuration (if enabled)');
     CliUtils.printSeparator();
   }
 
   void _showHelp(ArgParser parser) {
-    print('''
-${CliUtils.formatTitle('Flow CLI Web Development & Deployment')}
+    _logger.info('''
+${CliUtils.formatTitle('Flow CLI Web Development')}
 
 ${_localization.translate('commands.web')}
 
@@ -614,25 +618,25 @@ ${CliUtils.formatSubtitle('Usage:')}
   flow web <command> [options]
 
 ${CliUtils.formatSubtitle('Commands:')}
-  serve      Start development server with hot reload
-  build      Build web application
-  deploy     Deploy to hosting platform
+  serve      Start development server
+  build      Build web app
+  deploy     Deploy web app
   analyze    Analyze web build
-  pwa        Configure Progressive Web App
+  pwa        Configure PWA features
   optimize   Optimize web build
 
 ${CliUtils.formatSubtitle('Options:')}
 ${parser.usage}
 
 ${CliUtils.formatSubtitle('Examples:')}
-  flow web serve --port 8080
-  flow web serve --client client1 --auto-open
+  flow web serve
+  flow web serve --port 8080 --hostname localhost
   flow web build --release --pwa
-  flow web build --wasm --tree-shake-icons
-  flow web deploy
-  flow web analyze
+  flow web build --client client1 --wasm
+  flow web deploy --output ./build/web
+  flow web analyze --output ./build/web
   flow web pwa
-  flow web optimize
+  flow web optimize --output ./build/web
 ''');
   }
 }

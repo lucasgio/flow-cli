@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:interact/interact.dart';
 import 'package:flow_cli/core/utils/cli_utils.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/shared/services/localization_service.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
 import 'package:flow_cli/features/config/domain/config_usecase.dart';
@@ -10,6 +11,7 @@ class ConfigHandler {
   final ConfigUseCase _configUseCase = ConfigUseCase();
   final LocalizationService _localization = LocalizationService.instance;
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<void> handle(List<String> args) async {
     final parser = ArgParser()
@@ -79,18 +81,18 @@ class ConfigHandler {
   }
 
   Future<void> _listConfiguration() async {
-    print(CliUtils.formatTitle('Current Configuration'));
+    _logger.info(CliUtils.formatTitle('Current Configuration'));
     CliUtils.printSeparator();
 
-    print('Language: ${_configService.language}');
-    print('Flutter Path: ${_configService.flutterPath ?? 'Not set'}');
-    print('Project Path: ${_configService.projectPath ?? 'Not set'}');
-    print('Multi-client: ${_configService.multiClient}');
-    print('Current Client: ${_configService.currentClient ?? 'Not set'}');
-    print('Available Clients: ${_configService.clients.join(', ')}');
+    _logger.info('Language: ${_configService.language}');
+    _logger.info('Flutter Path: ${_configService.flutterPath ?? 'Not set'}');
+    _logger.info('Project Path: ${_configService.projectPath ?? 'Not set'}');
+    _logger.info('Multi-client: ${_configService.multiClient}');
+    _logger.info('Current Client: ${_configService.currentClient ?? 'Not set'}');
+    _logger.info('Available Clients: ${_configService.clients.join(', ')}');
 
     CliUtils.printSeparator();
-    print(
+    _logger.info(
         'Configuration Status: ${_configService.isConfigured ? 'Complete' : 'Incomplete'}');
   }
 
@@ -116,7 +118,7 @@ class ConfigHandler {
       flutterPath = value;
     } else {
       flutterPath = Input(
-        prompt: _localization.translate('config.flutter_path') + ':',
+        prompt: '${_localization.translate('config.flutter_path')}:',
         validator: (path) {
           if (path.isEmpty) return false;
           if (!Directory(path).existsSync()) return false;
@@ -151,7 +153,7 @@ class ConfigHandler {
       projectPath = value;
     } else {
       projectPath = Input(
-        prompt: _localization.translate('config.project_path') + ':',
+        prompt: '${_localization.translate('config.project_path')}:',
         validator: (path) {
           if (path.isEmpty) return false;
           if (!Directory(path).existsSync()) return false;
@@ -325,33 +327,37 @@ class ConfigHandler {
   }
 
   void _showHelp(ArgParser parser) {
-    print('''
+    _logger.info('''
 ${CliUtils.formatTitle('Flow CLI Configuration')}
 
 ${_localization.translate('commands.config')}
 
 ${CliUtils.formatSubtitle('Usage:')}
-  flow config <command> [value]
+  flow config <command> [options]
 
 ${CliUtils.formatSubtitle('Commands:')}
-  flutter-path <path>       Set Flutter SDK path
-  project-path <path>       Set project path
-  language <en|es>          Set language
-  multi-client <true|false> Enable/disable multi-client mode
-  add-client <name>         Add a new client
-  remove-client <name>      Remove a client
-  current-client <name>     Set current client
+  list              Show current configuration
+  reset             Reset all configuration
+  flutter-path      Set Flutter SDK path
+  project-path      Set project path
+  language          Set language (en/es)
+  multi-client      Enable/disable multi-client mode
+  add-client        Add a new client
+  remove-client     Remove a client
+  set-client        Set current client
 
 ${CliUtils.formatSubtitle('Options:')}
 ${parser.usage}
 
 ${CliUtils.formatSubtitle('Examples:')}
-  flow config --list
+  flow config list
   flow config flutter-path /path/to/flutter
-  flow config language es
+  flow config project-path /path/to/project
+  flow config language en
   flow config multi-client true
   flow config add-client client1
-  flow config current-client client1
+  flow config remove-client client1
+  flow config set-client client1
 ''');
   }
 }

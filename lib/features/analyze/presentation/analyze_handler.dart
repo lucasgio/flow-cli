@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:args/args.dart';
 import 'package:flow_cli/core/utils/cli_utils.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/shared/services/localization_service.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
 import 'package:flow_cli/features/analyze/domain/analyze_usecase.dart';
@@ -9,6 +10,7 @@ class AnalyzeHandler {
   final AnalyzeUseCase _analyzeUseCase = AnalyzeUseCase();
   final LocalizationService _localization = LocalizationService.instance;
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<void> handle(List<String> args) async {
     final parser = ArgParser()
@@ -96,7 +98,7 @@ class AnalyzeHandler {
 
   void _printOptimizationResults(Map<String, dynamic> results) {
     CliUtils.printSeparator();
-    print(CliUtils.formatTitle(
+    _logger.info(CliUtils.formatTitle(
         _localization.translate('analyze.recommendations')));
 
     final recommendations = results['recommendations'] as List<String>? ?? [];
@@ -111,7 +113,7 @@ class AnalyzeHandler {
 
   void _printPerformanceResults(Map<String, dynamic> results) {
     CliUtils.printSeparator();
-    print(CliUtils.formatTitle('Performance Analysis'));
+    _logger.info(CliUtils.formatTitle('Performance Analysis'));
 
     final issues = results['issues'] as List<String>? ?? [];
     if (issues.isEmpty) {
@@ -125,7 +127,7 @@ class AnalyzeHandler {
 
   void _printSizeResults(Map<String, dynamic> results) {
     CliUtils.printSeparator();
-    print(CliUtils.formatTitle('Size Analysis'));
+    _logger.info(CliUtils.formatTitle('Size Analysis'));
 
     final appSize = results['appSize'] as String?;
     if (appSize != null) {
@@ -137,14 +139,14 @@ class AnalyzeHandler {
     if (largeDependencies.isNotEmpty) {
       CliUtils.printInfo('Large dependencies:');
       for (final dep in largeDependencies) {
-        print('  - $dep');
+        _logger.info('  - $dep');
       }
     }
   }
 
   void _printDependencyResults(Map<String, dynamic> results) {
     CliUtils.printSeparator();
-    print(CliUtils.formatTitle('Dependency Analysis'));
+    _logger.info(CliUtils.formatTitle('Dependency Analysis'));
 
     final outdatedDeps = results['outdated'] as List<String>? ?? [];
     if (outdatedDeps.isEmpty) {
@@ -152,7 +154,7 @@ class AnalyzeHandler {
     } else {
       CliUtils.printWarning('Outdated dependencies:');
       for (final dep in outdatedDeps) {
-        print('  - $dep');
+        _logger.info('  - $dep');
       }
     }
 
@@ -160,14 +162,14 @@ class AnalyzeHandler {
     if (unusedDeps.isNotEmpty) {
       CliUtils.printInfo('Potentially unused dependencies:');
       for (final dep in unusedDeps) {
-        print('  - $dep');
+        _logger.info('  - $dep');
       }
     }
   }
 
   void _printSecurityResults(Map<String, dynamic> results) {
     CliUtils.printSeparator();
-    print(CliUtils.formatTitle('Security Analysis'));
+    _logger.info(CliUtils.formatTitle('Security Analysis'));
 
     final securityIssues = results['issues'] as List<String>? ?? [];
     if (securityIssues.isEmpty) {
@@ -180,7 +182,7 @@ class AnalyzeHandler {
   }
 
   void _showHelp(ArgParser parser) {
-    print('''
+    _logger.info('''
 ${CliUtils.formatTitle('Flow CLI Analysis')}
 
 ${_localization.translate('commands.analyze')}

@@ -4,9 +4,11 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'package:flow_cli/core/utils/cli_utils.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 
 class WebUseCase {
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<WebServerSession?> startDevelopmentServer({
     required int port,
@@ -57,7 +59,7 @@ class WebUseCase {
       );
 
       // Wait for server to start
-      await Future.delayed(Duration(seconds: 3));
+      await Future.delayed(const Duration(seconds: 3));
 
       // Check if process is still running
       if (await _isProcessRunning(process)) {
@@ -95,7 +97,7 @@ class WebUseCase {
     // Listen to stdout
     session.process.stdout
         .transform(utf8.decoder)
-        .transform(LineSplitter())
+        .transform(const LineSplitter())
         .listen((line) {
       if (line.trim().isNotEmpty) {
         final logEntry = _parseWebLogLine(line, 'stdout');
@@ -106,7 +108,7 @@ class WebUseCase {
     // Listen to stderr
     session.process.stderr
         .transform(utf8.decoder)
-        .transform(LineSplitter())
+        .transform(const LineSplitter())
         .listen((line) {
       if (line.trim().isNotEmpty) {
         final logEntry = _parseWebLogLine(line, 'stderr');
@@ -177,7 +179,7 @@ class WebUseCase {
       session.reloadCount++;
 
       // Wait a bit for the reload to process
-      await Future.delayed(Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
 
       return true;
     } catch (e) {
@@ -195,7 +197,7 @@ class WebUseCase {
       session.restartCount++;
 
       // Wait a bit for the restart to process
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
 
       return true;
     } catch (e) {
@@ -257,10 +259,15 @@ class WebUseCase {
   }
 
   String _formatBytes(int bytes) {
-    if (bytes < 1024) return '${bytes}B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)}KB';
-    if (bytes < 1024 * 1024 * 1024)
+    if (bytes < 1024) {
+      return '${bytes}B';
+    }
+    if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)}KB';
+    }
+    if (bytes < 1024 * 1024 * 1024) {
       return '${(bytes / (1024 * 1024)).toStringAsFixed(1)}MB';
+    }
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)}GB';
   }
 
@@ -335,7 +342,7 @@ class WebUseCase {
       } else {
         CliUtils.printError(
             'Web build failed with exit code: ${result.exitCode}');
-        print(result.stderr);
+        _logger.error(result.stderr);
         return false;
       }
     } catch (e) {
@@ -795,7 +802,7 @@ class WebServerSession {
       await process.stdin.flush();
 
       // Wait a bit for graceful shutdown
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
 
       // Force kill if still running
       if (!process.kill()) {

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:args/args.dart';
 import 'package:flow_cli/core/utils/cli_utils.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/shared/services/localization_service.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
 import 'package:flow_cli/features/build/domain/build_usecase.dart';
@@ -10,6 +11,7 @@ class BuildHandler {
   final BuildUseCase _buildUseCase = BuildUseCase();
   final LocalizationService _localization = LocalizationService.instance;
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<void> handle(List<String> args) async {
     final parser = ArgParser()
@@ -53,11 +55,13 @@ class BuildHandler {
 
       // Determine build mode
       String buildMode = AppConstants.defaultBuildMode;
-      if (results['release'])
+      if (results['release']) {
         buildMode = 'release';
-      else if (results['profile'])
+      } else if (results['profile']) {
         buildMode = 'profile';
-      else if (results['debug']) buildMode = 'debug';
+      } else if (results['debug']) {
+        buildMode = 'debug';
+      }
 
       // Handle multi-client
       String? client = results['client'];
@@ -71,7 +75,9 @@ class BuildHandler {
       CliUtils.printInfo(_localization.translate('build.starting'));
       CliUtils.printInfo('Platform: $platform');
       CliUtils.printInfo('Build mode: $buildMode');
-      if (client != null) CliUtils.printInfo('Client: $client');
+      if (client != null) {
+        CliUtils.printInfo('Client: $client');
+      }
 
       // Clean if requested
       if (results['clean']) {
@@ -104,7 +110,7 @@ class BuildHandler {
   }
 
   void _showHelp(ArgParser parser) {
-    print('''
+    _logger.info('''
 ${CliUtils.formatTitle('Flow CLI Build')}
 
 ${_localization.translate('commands.build')}

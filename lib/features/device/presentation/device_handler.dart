@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:interact/interact.dart';
 import 'package:flow_cli/core/utils/cli_utils.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/shared/services/localization_service.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
 import 'package:flow_cli/features/device/domain/device_usecase.dart';
@@ -13,6 +14,7 @@ class DeviceHandler {
   final HotReloadHandler _hotReloadHandler = HotReloadHandler();
   final LocalizationService _localization = LocalizationService.instance;
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<void> handle(List<String> args) async {
     final parser = ArgParser()
@@ -100,7 +102,7 @@ class DeviceHandler {
     }
 
     CliUtils.printSeparator();
-    print(CliUtils.formatTitle('Available Devices'));
+    _logger.info(CliUtils.formatTitle('Available Devices'));
     CliUtils.printSeparator();
 
     for (final device in filteredDevices) {
@@ -283,19 +285,19 @@ class DeviceHandler {
     final statusColor = device.isOnline ? '🟢' : '🔴';
     final typeIcon = device.isPhysical ? '📱' : '🖥️';
 
-    print('$statusColor $typeIcon ${device.name}');
-    print('   Platform: ${device.platform}');
-    print('   ID: ${device.id}');
-    print('   Status: ${device.isOnline ? 'Online' : 'Offline'}');
-    print('   Type: ${device.isPhysical ? 'Physical' : 'Emulator'}');
+    _logger.info('$statusColor $typeIcon ${device.name}');
+    _logger.info('   Platform: ${device.platform}');
+    _logger.info('   ID: ${device.id}');
+    _logger.info('   Status: ${device.isOnline ? 'Online' : 'Offline'}');
+    _logger.info('   Type: ${device.isPhysical ? 'Physical' : 'Emulator'}');
     if (device.version != null) {
-      print('   Version: ${device.version}');
+      _logger.info('   Version: ${device.version}');
     }
-    print('');
+    _logger.info('');
   }
 
   void _showHelp(ArgParser parser) {
-    print('''
+    _logger.info('''
 ${CliUtils.formatTitle('Flow CLI Device Management')}
 
 ${_localization.translate('commands.device')}
@@ -304,12 +306,12 @@ ${CliUtils.formatSubtitle('Usage:')}
   flow device <command> [options]
 
 ${CliUtils.formatSubtitle('Commands:')}
-  list        List all available devices
-  run         Run app on selected device
+  list        List available devices
+  run         Run app on device
   logs        Show device logs
   install     Install app on device
   uninstall   Uninstall app from device
-  hotreload   Start hot reload session
+  hotreload   Start hot reload on device
 
 ${CliUtils.formatSubtitle('Options:')}
 ${parser.usage}
@@ -317,11 +319,11 @@ ${parser.usage}
 ${CliUtils.formatSubtitle('Examples:')}
   flow device list
   flow device list --platform android
-  flow device run --client client1
-  flow device logs --platform ios
-  flow device install --client client1
-  flow device hotreload --platform android
-  flow device hotreload --client client1
+  flow device run --platform ios --client client1
+  flow device logs --platform android
+  flow device install --platform ios --client client1
+  flow device uninstall --platform android --client client1
+  flow device hotreload --platform ios --client client1
 ''');
   }
 }

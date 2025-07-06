@@ -2,10 +2,12 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:flow_cli/core/utils/cli_utils.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/core/constants/app_constants.dart';
 
 class BuildUseCase {
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<bool> build({
     required String platform,
@@ -62,7 +64,7 @@ class BuildUseCase {
         } else {
           CliUtils.printError(
               'Build failed with exit code: ${result.exitCode}');
-          print(result.stderr);
+          _logger.error(result.stderr);
           return false;
         }
       } finally {
@@ -97,7 +99,7 @@ class BuildUseCase {
         CliUtils.printSuccess('Branding generated successfully');
       } else {
         CliUtils.printError('Branding generation failed');
-        print(result.stderr);
+        _logger.error(result.stderr);
       }
     } catch (e) {
       CliUtils.printError('Branding generation error: $e');
@@ -122,7 +124,7 @@ class BuildUseCase {
         CliUtils.printSuccess('Project cleaned successfully');
       } else {
         CliUtils.printError('Clean failed');
-        print(result.stderr);
+        _logger.error(result.stderr);
       }
     } catch (e) {
       CliUtils.printError('Clean error: $e');

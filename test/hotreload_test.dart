@@ -24,7 +24,7 @@ void main() {
     });
 
     test('should create hot reload session', () {
-      final device = DeviceModel(
+      final device = const DeviceModel(
         id: 'test-device',
         name: 'Test Device',
         platform: 'android',
@@ -46,7 +46,7 @@ void main() {
     });
 
     test('should create performance metrics', () async {
-      final device = DeviceModel(
+      final device = const DeviceModel(
         id: 'test-device',
         name: 'Test Device',
         platform: 'android',

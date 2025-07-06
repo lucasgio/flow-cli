@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:interact/interact.dart';
 import 'package:flow_cli/core/utils/cli_utils.dart';
-import 'package:flow_cli/shared/services/localization_service.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
 import 'package:flow_cli/features/hotreload/domain/hotreload_usecase.dart';
 import 'package:flow_cli/features/device/domain/device_usecase.dart';
@@ -13,6 +13,7 @@ class HotReloadHandler {
   final HotReloadUseCase _hotReloadUseCase = HotReloadUseCase();
   final DeviceUseCase _deviceUseCase = DeviceUseCase();
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<void> handle(List<String> args) async {
     final parser = ArgParser()
@@ -226,20 +227,20 @@ class HotReloadHandler {
   }
 
   void _printHotReloadInstructions() {
-    print('\n${CliUtils.formatTitle('Hot Reload Controls')}');
+    _logger.info('\n${CliUtils.formatTitle('Hot Reload Controls')}');
     CliUtils.printSeparator();
-    print('${CliUtils.formatSubtitle('Commands:')}');
-    print('  r  - Hot reload (⚡)');
-    print('  R  - Hot restart (🔄)');
-    print('  h  - Show this help');
-    print('  c  - Clear console');
-    print('  l  - Toggle log level');
-    print('  v  - Toggle verbose mode');
-    print('  s  - Capture screenshot');
-    print('  d  - Show device info');
-    print('  q  - Quit hot reload session');
+    _logger.info(CliUtils.formatSubtitle('Commands:'));
+    _logger.info('  r  - Hot reload (⚡)');
+    _logger.info('  R  - Hot restart (🔄)');
+    _logger.info('  h  - Show this help');
+    _logger.info('  c  - Clear console');
+    _logger.info('  l  - Toggle log level');
+    _logger.info('  v  - Toggle verbose mode');
+    _logger.info('  s  - Capture screenshot');
+    _logger.info('  d  - Show device info');
+    _logger.info('  q  - Quit hot reload session');
     CliUtils.printSeparator();
-    print('');
+    _logger.info('');
   }
 
   Future<void> _performHotReload(
@@ -301,19 +302,19 @@ class HotReloadHandler {
 
     switch (levelColor) {
       case 'red':
-        print('\x1b[31m$formattedMessage\x1b[0m');
+        _logger.error('\x1b[31m$formattedMessage\x1b[0m');
         break;
       case 'yellow':
-        print('\x1b[33m$formattedMessage\x1b[0m');
+        _logger.warning('\x1b[33m$formattedMessage\x1b[0m');
         break;
       case 'blue':
-        print('\x1b[34m$formattedMessage\x1b[0m');
+        _logger.info('\x1b[34m$formattedMessage\x1b[0m');
         break;
       case 'gray':
-        print('\x1b[90m$formattedMessage\x1b[0m');
+        _logger.debug('\x1b[90m$formattedMessage\x1b[0m');
         break;
       default:
-        print(formattedMessage);
+        _logger.info(formattedMessage);
     }
   }
 
@@ -391,18 +392,21 @@ class HotReloadHandler {
   }
 
   Future<void> _showDeviceInfo(DeviceModel device) async {
-    print('\n${CliUtils.formatTitle('Device Information')}');
+    _logger.info('\n${CliUtils.formatTitle('Device Information')}');
     CliUtils.printSeparator();
-    print('Name: ${device.name}');
-    print('Platform: ${device.platform}');
-    print('ID: ${device.id}');
-    print('Type: ${device.isPhysical ? 'Physical Device' : 'Emulator'}');
-    print('Status: ${device.isOnline ? 'Online' : 'Offline'}');
-    if (device.version != null) print('Version: ${device.version}');
-    if (device.architecture != null)
-      print('Architecture: ${device.architecture}');
+    _logger.info('Name: ${device.name}');
+    _logger.info('Platform: ${device.platform}');
+    _logger.info('ID: ${device.id}');
+    _logger.info('Type: ${device.isPhysical ? 'Physical Device' : 'Emulator'}');
+    _logger.info('Status: ${device.isOnline ? 'Online' : 'Offline'}');
+    if (device.version != null) {
+      _logger.info('Version: ${device.version}');
+    }
+    if (device.architecture != null) {
+      _logger.info('Architecture: ${device.architecture}');
+    }
     CliUtils.printSeparator();
-    print('');
+    _logger.info('');
   }
 
   void _playSuccessSound() {
@@ -413,11 +417,11 @@ class HotReloadHandler {
   void _playErrorSound() {
     // Double bell for errors
     stdout.write('\x07');
-    Future.delayed(Duration(milliseconds: 100), () => stdout.write('\x07'));
+    Future.delayed(const Duration(milliseconds: 100), () => stdout.write('\x07'));
   }
 
   void _showHelp(ArgParser parser) {
-    print('''
+    _logger.info('''
 ${CliUtils.formatTitle('Flow CLI Hot Reload')}
 
 Start hot reload session with real-time logging

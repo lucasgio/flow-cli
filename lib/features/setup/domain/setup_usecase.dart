@@ -88,11 +88,11 @@ class SetupUseCase {
     // Create a simple placeholder text file (in real implementation, you'd create actual images)
     await file.writeAsString('''
 # Placeholder for ${path.basename(imagePath)}
-# Required dimensions: ${width}x${height}
+# Required dimensions: ${width}x$height
 # Please replace this file with your actual image
 
 This is a placeholder file. Replace it with your actual image file.
-Required dimensions: ${width}x${height} pixels
+Required dimensions: ${width}x$height pixels
 Format: PNG
 ''');
   }

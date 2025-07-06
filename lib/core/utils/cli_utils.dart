@@ -1,21 +1,24 @@
 import 'dart:io';
 import 'package:colorize/colorize.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 
 class CliUtils {
+  static final _logger = AppLogger.instance;
+
   static void printSuccess(String message) {
-    print(Colorize('✅ $message').green());
+    _logger.info(Colorize('✅ $message').green().toString());
   }
 
   static void printError(String message) {
-    print(Colorize('❌ $message').red());
+    _logger.error(Colorize('❌ $message').red().toString());
   }
 
   static void printWarning(String message) {
-    print(Colorize('⚠️  $message').yellow());
+    _logger.warning(Colorize('⚠️  $message').yellow().toString());
   }
 
   static void printInfo(String message) {
-    print(Colorize('ℹ️  $message').blue());
+    _logger.info(Colorize('ℹ️  $message').blue().toString());
   }
 
   static String formatTitle(String title) {
@@ -27,7 +30,7 @@ class CliUtils {
   }
 
   static void printSeparator() {
-    print(Colorize('─' * 50).darkGray());
+    _logger.info(Colorize('─' * 50).darkGray().toString());
   }
 
   static Future<bool> confirm(String message) async {

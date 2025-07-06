@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'package:flow_cli/core/utils/cli_utils.dart';
 import 'package:flow_cli/shared/services/config_service.dart';
+import 'package:flow_cli/core/utils/logger.dart';
 import 'package:flow_cli/shared/models/device_model.dart';
 
 class DeviceUseCase {
   final ConfigService _configService = ConfigService.instance;
+  final _logger = AppLogger.instance;
 
   Future<List<DeviceModel>> getDevices({String? platform}) async {
     final devices = <DeviceModel>[];
@@ -118,7 +120,7 @@ class DeviceUseCase {
         return true;
       } else {
         CliUtils.printError('Failed to run on device');
-        print(result.stderr);
+        _logger.error(result.stderr);
         return false;
       }
     } catch (e) {
@@ -246,11 +248,11 @@ class DeviceUseCase {
 
       // Stream logs to console
       process.stdout.transform(utf8.decoder).listen((data) {
-        print(data);
+        _logger.info(data);
       });
 
       process.stderr.transform(utf8.decoder).listen((data) {
-        print(data);
+        _logger.error(data);
       });
 
       await process.exitCode;
