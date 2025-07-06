@@ -88,7 +88,8 @@ class ConfigHandler {
     _logger.info('Flutter Path: ${_configService.flutterPath ?? 'Not set'}');
     _logger.info('Project Path: ${_configService.projectPath ?? 'Not set'}');
     _logger.info('Multi-client: ${_configService.multiClient}');
-    _logger.info('Current Client: ${_configService.currentClient ?? 'Not set'}');
+    _logger
+        .info('Current Client: ${_configService.currentClient ?? 'Not set'}');
     _logger.info('Available Clients: ${_configService.clients.join(', ')}');
 
     CliUtils.printSeparator();

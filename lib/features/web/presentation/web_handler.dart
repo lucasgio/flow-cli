@@ -391,8 +391,8 @@ class WebHandler {
     CliUtils.clearLine();
 
     if (success) {
-      _logger.info(
-          '⚡ Web reload completed in ${stopwatch.elapsedMilliseconds}ms');
+      _logger
+          .info('⚡ Web reload completed in ${stopwatch.elapsedMilliseconds}ms');
     } else {
       _logger.error('❌ Web reload failed');
     }
@@ -480,7 +480,8 @@ class WebHandler {
     _logger.info('⚡ Estimated load time: $loadTime');
 
     if (recommendations.isNotEmpty) {
-      _logger.info('\n${CliUtils.formatSubtitle('Optimization Recommendations:')}');
+      _logger.info(
+          '\n${CliUtils.formatSubtitle('Optimization Recommendations:')}');
       for (final rec in recommendations) {
         CliUtils.printInfo(rec);
       }
