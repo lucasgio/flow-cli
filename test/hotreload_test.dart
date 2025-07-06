@@ -17,7 +17,7 @@ void main() {
         timestamp: DateTime.now(),
         source: 'test',
       );
-      
+
       expect(logEntry.level, equals('info'));
       expect(logEntry.message, equals('Test message'));
       expect(logEntry.source, equals('test'));
@@ -31,7 +31,7 @@ void main() {
         isPhysical: false,
         isOnline: true,
       );
-      
+
       // Note: We can't easily test actual process creation in unit tests
       // This would require integration tests with actual Flutter projects
       expect(device.platform, equals('android'));
@@ -53,17 +53,17 @@ void main() {
         isPhysical: false,
         isOnline: true,
       );
-      
+
       // Mock session (can't create real process in tests)
       final startTime = DateTime.now();
-      
+
       // In a real session, we'd pass the actual process
       final metrics = {
         'device': device.name,
         'platform': device.platform,
         'uptime': DateTime.now().difference(startTime).inMilliseconds,
       };
-      
+
       expect(metrics['device'], equals('Test Device'));
       expect(metrics['platform'], equals('android'));
       expect(metrics['uptime'], isA<int>());

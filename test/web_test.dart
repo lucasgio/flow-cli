@@ -16,7 +16,7 @@ void main() {
         timestamp: DateTime.now(),
         source: 'test',
       );
-      
+
       expect(logEntry.level, equals('info'));
       expect(logEntry.message, equals('Web server started'));
       expect(logEntry.source, equals('test'));
@@ -25,11 +25,11 @@ void main() {
     test('should create web server session', () {
       // Note: We can't easily test actual process creation in unit tests
       // This would require integration tests with actual Flutter projects
-      
+
       final startTime = DateTime.now();
       const port = 3000;
       const hostname = 'localhost';
-      
+
       expect(port, equals(3000));
       expect(hostname, equals('localhost'));
       expect(startTime, isA<DateTime>());
@@ -43,7 +43,7 @@ void main() {
         'estimatedLoadTime': '1.2s',
         'recommendations': ['Consider code splitting', 'Optimize images'],
       };
-      
+
       expect(analysis['bundleSize'], equals('2.5MB'));
       expect(analysis['assetCount'], equals(25));
       expect(analysis['recommendations'], isA<List<String>>());
@@ -54,7 +54,7 @@ void main() {
       const bytes1024 = 1024;
       const bytes1MB = 1024 * 1024;
       const bytes1GB = 1024 * 1024 * 1024;
-      
+
       // These would test the _formatBytes method if it was public
       expect(bytes1024, equals(1024));
       expect(bytes1MB, equals(1048576));
@@ -69,7 +69,7 @@ void main() {
         'serviceWorker': '/path/to/sw.js',
         'icons': '/path/to/icons',
       };
-      
+
       expect(pwaConfig['manifest'], contains('manifest.json'));
       expect(pwaConfig['serviceWorker'], contains('sw.js'));
       expect(pwaConfig['icons'], contains('icons'));
@@ -85,7 +85,7 @@ void main() {
         'custom_server_(ftp/sftp)',
         'manual_(copy_files)'
       ];
-      
+
       expect(platforms.length, equals(7));
       expect(platforms, contains('firebase_hosting'));
       expect(platforms, contains('netlify'));

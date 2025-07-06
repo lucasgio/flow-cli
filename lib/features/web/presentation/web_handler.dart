@@ -11,38 +11,47 @@ class WebHandler {
   final WebUseCase _webUseCase = WebUseCase();
   final LocalizationService _localization = LocalizationService.instance;
   final ConfigService _configService = ConfigService.instance;
-  
+
   Future<void> handle(List<String> args) async {
     final parser = ArgParser()
-      ..addOption('port', abbr: 'p', help: 'Development server port', defaultsTo: '3000')
-      ..addOption('hostname', help: 'Development server hostname', defaultsTo: 'localhost')
+      ..addOption('port',
+          abbr: 'p', help: 'Development server port', defaultsTo: '3000')
+      ..addOption('hostname',
+          help: 'Development server hostname', defaultsTo: 'localhost')
       ..addOption('client', help: 'Client name for multi-client apps')
-      ..addOption('output', help: 'Output directory for build', defaultsTo: 'build/web')
+      ..addOption('output',
+          help: 'Output directory for build', defaultsTo: 'build/web')
       ..addFlag('release', help: 'Build in release mode', negatable: false)
       ..addFlag('profile', help: 'Build in profile mode', negatable: false)
       ..addFlag('pwa', help: 'Enable PWA features', negatable: false)
-      ..addFlag('wasm', help: 'Enable WebAssembly compilation', negatable: false)
-      ..addFlag('tree-shake-icons', help: 'Tree shake icons', negatable: true, defaultsTo: true)
-      ..addFlag('source-maps', help: 'Generate source maps', negatable: true, defaultsTo: true)
+      ..addFlag('wasm',
+          help: 'Enable WebAssembly compilation', negatable: false)
+      ..addFlag('tree-shake-icons',
+          help: 'Tree shake icons', negatable: true, defaultsTo: true)
+      ..addFlag('source-maps',
+          help: 'Generate source maps', negatable: true, defaultsTo: true)
       ..addFlag('verbose', abbr: 'v', help: 'Verbose output', negatable: false)
-      ..addFlag('auto-open', help: 'Auto open browser', negatable: true, defaultsTo: true)
-      ..addFlag('help', abbr: 'h', help: 'Show help for web command', negatable: false);
-    
+      ..addFlag('auto-open',
+          help: 'Auto open browser', negatable: true, defaultsTo: true)
+      ..addFlag('help',
+          abbr: 'h', help: 'Show help for web command', negatable: false);
+
     try {
       final results = parser.parse(args);
-      
+
       if (results['help']) {
         _showHelp(parser);
         return;
       }
-      
+
       if (!_configService.isConfigured) {
-        CliUtils.printError('Flow CLI is not configured. Please run: flow setup');
+        CliUtils.printError(
+            'Flow CLI is not configured. Please run: flow setup');
         exit(1);
       }
-      
+
       final command = results.rest.isNotEmpty ? results.rest[0] : 'serve';
-      
+
       switch (command) {
         case 'serve':
           await _serveDevelopment(results);
@@ -67,32 +76,32 @@ class WebHandler {
           _showHelp(parser);
           exit(1);
       }
-      
     } catch (e) {
       CliUtils.printError('Web command failed: $e');
       exit(1);
     }
   }
-  
+
   Future<void> _serveDevelopment(ArgResults results) async {
     final port = int.tryParse(results['port']) ?? 3000;
     final hostname = results['hostname'] as String;
     final client = results['client'] as String?;
     final verbose = results['verbose'] as bool;
     final autoOpen = results['auto-open'] as bool;
-    
+
     // Handle multi-client requirement
     if (_configService.multiClient && client == null) {
       CliUtils.printError('Multi-client mode requires --client parameter');
-      CliUtils.printInfo('Available clients: ${_configService.clients.join(', ')}');
+      CliUtils.printInfo(
+          'Available clients: ${_configService.clients.join(', ')}');
       exit(1);
     }
-    
+
     CliUtils.printInfo('Starting Flutter web development server...');
     CliUtils.printInfo('Port: $port');
     CliUtils.printInfo('Hostname: $hostname');
     if (client != null) CliUtils.printInfo('Client: $client');
-    
+
     // Start the development server
     final serverSession = await _webUseCase.startDevelopmentServer(
       port: port,
@@ -101,31 +110,31 @@ class WebHandler {
       verbose: verbose,
       autoOpen: autoOpen,
     );
-    
+
     if (serverSession == null) {
       CliUtils.printError('Failed to start development server');
       exit(1);
     }
-    
+
     _printWebServerInstructions(hostname, port);
-    
+
     // Set up keyboard input handling
     stdin.echoMode = false;
     stdin.lineMode = false;
-    
+
     // Start log streaming
     late StreamSubscription<WebLogEntry> logSubscription;
     late StreamSubscription<List<int>> keyboardSubscription;
-    
-    logSubscription = _webUseCase.getLogStream(serverSession)
-      .listen((logEntry) {
-        _printWebLogEntry(logEntry, verbose);
-      });
-    
+
+    logSubscription =
+        _webUseCase.getLogStream(serverSession).listen((logEntry) {
+      _printWebLogEntry(logEntry, verbose);
+    });
+
     // Handle keyboard input
     keyboardSubscription = stdin.listen((data) async {
       final key = String.fromCharCodes(data).toLowerCase();
-      
+
       switch (key) {
         case 'r':
           await _performHotReload(serverSession);
@@ -159,17 +168,17 @@ class WebHandler {
           return;
       }
     });
-    
+
     // Wait for server to end
     await serverSession.waitForExit();
-    
+
     // Cleanup
     await logSubscription.cancel();
     await keyboardSubscription.cancel();
     stdin.echoMode = true;
     stdin.lineMode = true;
   }
-  
+
   Future<void> _buildWeb(ArgResults results) async {
     final release = results['release'] as bool;
     final profile = results['profile'] as bool;
@@ -180,25 +189,27 @@ class WebHandler {
     final client = results['client'] as String?;
     final output = results['output'] as String;
     final verbose = results['verbose'] as bool;
-    
+
     // Handle multi-client requirement
     if (_configService.multiClient && client == null) {
       CliUtils.printError('Multi-client mode requires --client parameter');
-      CliUtils.printInfo('Available clients: ${_configService.clients.join(', ')}');
+      CliUtils.printInfo(
+          'Available clients: ${_configService.clients.join(', ')}');
       exit(1);
     }
-    
+
     String buildMode = 'debug';
-    if (release) buildMode = 'release';
+    if (release)
+      buildMode = 'release';
     else if (profile) buildMode = 'profile';
-    
+
     CliUtils.printInfo('Building Flutter web app...');
     CliUtils.printInfo('Build mode: $buildMode');
     CliUtils.printInfo('Output directory: $output');
     if (client != null) CliUtils.printInfo('Client: $client');
     if (pwa) CliUtils.printInfo('PWA features enabled');
     if (wasm) CliUtils.printInfo('WebAssembly compilation enabled');
-    
+
     final success = await _webUseCase.buildWeb(
       buildMode: buildMode,
       client: client,
@@ -209,11 +220,11 @@ class WebHandler {
       sourceMaps: sourceMaps,
       verbose: verbose,
     );
-    
+
     if (success) {
       CliUtils.printSuccess('Web build completed successfully!');
       CliUtils.printInfo('Output location: $output');
-      
+
       // Show build analysis
       await _analyzeBuildOutput(output);
     } else {
@@ -221,19 +232,19 @@ class WebHandler {
       exit(1);
     }
   }
-  
+
   Future<void> _deployWeb(ArgResults results) async {
     final output = results['output'] as String;
     final client = results['client'] as String?;
-    
+
     if (!Directory(output).existsSync()) {
       CliUtils.printError('Build output not found: $output');
       CliUtils.printInfo('Run: flow web build --release');
       exit(1);
     }
-    
+
     CliUtils.printInfo('Preparing web deployment...');
-    
+
     // Show deployment options
     final platforms = [
       'Firebase Hosting',
@@ -244,36 +255,37 @@ class WebHandler {
       'Custom Server (FTP/SFTP)',
       'Manual (Copy files)'
     ];
-    
+
     final selectionIndex = Select(
       prompt: 'Select deployment platform:',
       options: platforms,
     ).interact();
-    
-    final platform = platforms[selectionIndex].toLowerCase().replaceAll(' ', '_');
-    
+
+    final platform =
+        platforms[selectionIndex].toLowerCase().replaceAll(' ', '_');
+
     await _deployToPlatform(platform, output, client);
   }
-  
+
   Future<void> _analyzeWeb(ArgResults results) async {
     final output = results['output'] as String;
-    
+
     CliUtils.printInfo('Analyzing web build...');
-    
+
     if (!Directory(output).existsSync()) {
       CliUtils.printWarning('Build output not found. Building first...');
       await _buildWeb(results);
     }
-    
+
     final analysis = await _webUseCase.analyzeWebBuild(output);
     _printWebAnalysis(analysis);
   }
-  
+
   Future<void> _configurePWA(ArgResults results) async {
     CliUtils.printInfo('Configuring Progressive Web App (PWA) features...');
-    
+
     final pwaConfig = await _webUseCase.generatePWAConfig();
-    
+
     if (pwaConfig != null) {
       CliUtils.printSuccess('PWA configuration generated successfully!');
       CliUtils.printInfo('Files created:');
@@ -284,27 +296,27 @@ class WebHandler {
       CliUtils.printError('Failed to generate PWA configuration');
     }
   }
-  
+
   Future<void> _optimizeWeb(ArgResults results) async {
     final output = results['output'] as String;
-    
+
     CliUtils.printInfo('Optimizing web build...');
-    
+
     if (!Directory(output).existsSync()) {
       CliUtils.printError('Build output not found: $output');
       CliUtils.printInfo('Run: flow web build --release');
       exit(1);
     }
-    
+
     final optimizations = await _webUseCase.optimizeWebBuild(output);
-    
+
     CliUtils.printSuccess('Web optimization completed!');
     CliUtils.printInfo('Optimizations applied:');
     for (final optimization in optimizations) {
       CliUtils.printInfo('  ✓ $optimization');
     }
   }
-  
+
   void _printWebServerInstructions(String hostname, int port) {
     print('\n${CliUtils.formatTitle('Flutter Web Development Server')}');
     CliUtils.printSeparator();
@@ -322,15 +334,15 @@ class WebHandler {
     CliUtils.printSeparator();
     print('');
   }
-  
+
   void _printWebLogEntry(WebLogEntry logEntry, bool verbose) {
-    final timestamp = verbose 
-      ? '[${logEntry.timestamp.toIso8601String().substring(11, 23)}] '
-      : '';
-    
+    final timestamp = verbose
+        ? '[${logEntry.timestamp.toIso8601String().substring(11, 23)}] '
+        : '';
+
     final levelIcon = _getWebLogLevelIcon(logEntry.level);
     final formattedMessage = '$timestamp$levelIcon ${logEntry.message}';
-    
+
     switch (logEntry.level.toLowerCase()) {
       case 'error':
         print('\x1b[31m$formattedMessage\x1b[0m');
@@ -348,7 +360,7 @@ class WebHandler {
         print(formattedMessage);
     }
   }
-  
+
   String _getWebLogLevelIcon(String level) {
     switch (level.toLowerCase()) {
       case 'error':
@@ -363,45 +375,47 @@ class WebHandler {
         return '📝';
     }
   }
-  
+
   Future<void> _performHotReload(WebServerSession session) async {
     CliUtils.clearLine();
     stdout.write('⚡ Reloading web app...');
-    
+
     final stopwatch = Stopwatch()..start();
     final success = await _webUseCase.performWebHotReload(session);
     stopwatch.stop();
-    
+
     CliUtils.clearLine();
-    
+
     if (success) {
-      CliUtils.printSuccess('⚡ Web reload completed in ${stopwatch.elapsedMilliseconds}ms');
+      CliUtils.printSuccess(
+          '⚡ Web reload completed in ${stopwatch.elapsedMilliseconds}ms');
     } else {
       CliUtils.printError('❌ Web reload failed');
     }
   }
-  
+
   Future<void> _performHotRestart(WebServerSession session) async {
     CliUtils.clearLine();
     stdout.write('🔄 Restarting web app...');
-    
+
     final stopwatch = Stopwatch()..start();
     final success = await _webUseCase.performWebHotRestart(session);
     stopwatch.stop();
-    
+
     CliUtils.clearLine();
-    
+
     if (success) {
-      CliUtils.printSuccess('🔄 Web restart completed in ${stopwatch.elapsedMilliseconds}ms');
+      CliUtils.printSuccess(
+          '🔄 Web restart completed in ${stopwatch.elapsedMilliseconds}ms');
     } else {
       CliUtils.printError('❌ Web restart failed');
     }
   }
-  
+
   Future<void> _openBrowser(String hostname, int port) async {
     try {
       final url = 'http://$hostname:$port';
-      
+
       if (Platform.isMacOS) {
         await Process.run('open', [url]);
       } else if (Platform.isWindows) {
@@ -409,13 +423,13 @@ class WebHandler {
       } else if (Platform.isLinux) {
         await Process.run('xdg-open', [url]);
       }
-      
+
       CliUtils.printSuccess('Browser opened: $url');
     } catch (e) {
       CliUtils.printError('Failed to open browser: $e');
     }
   }
-  
+
   void _clearConsole() {
     if (Platform.isWindows) {
       Process.runSync('cls', [], runInShell: true);
@@ -424,15 +438,15 @@ class WebHandler {
     }
     _printWebServerInstructions('localhost', 3000);
   }
-  
+
   Future<void> _showWebLogs(WebServerSession session) async {
     CliUtils.printInfo('📊 Web Server Logs:');
     // Implementation would show recent logs
   }
-  
+
   Future<void> _showPerformanceStats(WebServerSession session) async {
     final stats = await _webUseCase.getPerformanceStats(session);
-    
+
     print('\n${CliUtils.formatTitle('Performance Statistics')}');
     CliUtils.printSeparator();
     print('Uptime: ${stats['uptime']}');
@@ -442,37 +456,38 @@ class WebHandler {
     CliUtils.printSeparator();
     print('');
   }
-  
+
   Future<void> _analyzeBuildOutput(String outputDir) async {
     final analysis = await _webUseCase.analyzeWebBuild(outputDir);
     _printWebAnalysis(analysis);
   }
-  
+
   void _printWebAnalysis(Map<String, dynamic> analysis) {
     print('\n${CliUtils.formatTitle('Web Build Analysis')}');
     CliUtils.printSeparator();
-    
+
     final bundleSize = analysis['bundleSize'] as String? ?? 'Unknown';
     final assetCount = analysis['assetCount'] as int? ?? 0;
     final loadTime = analysis['estimatedLoadTime'] as String? ?? 'Unknown';
     final recommendations = analysis['recommendations'] as List<String>? ?? [];
-    
+
     print('📦 Bundle size: $bundleSize');
     print('📄 Asset count: $assetCount');
     print('⚡ Estimated load time: $loadTime');
-    
+
     if (recommendations.isNotEmpty) {
       print('\n${CliUtils.formatSubtitle('Optimization Recommendations:')}');
       for (final rec in recommendations) {
         CliUtils.printInfo(rec);
       }
     }
-    
+
     CliUtils.printSeparator();
     print('');
   }
-  
-  Future<void> _deployToPlatform(String platform, String output, String? client) async {
+
+  Future<void> _deployToPlatform(
+      String platform, String output, String? client) async {
     switch (platform) {
       case 'firebase_hosting':
         await _deployToFirebase(output, client);
@@ -497,79 +512,79 @@ class WebHandler {
         break;
     }
   }
-  
+
   Future<void> _deployToFirebase(String output, String? client) async {
     CliUtils.printInfo('🔥 Deploying to Firebase Hosting...');
-    
+
     final success = await _webUseCase.deployToFirebase(output, client);
-    
+
     if (success) {
       CliUtils.printSuccess('🔥 Successfully deployed to Firebase Hosting!');
     } else {
       CliUtils.printError('Firebase deployment failed');
     }
   }
-  
+
   Future<void> _deployToNetlify(String output, String? client) async {
     CliUtils.printInfo('🌐 Deploying to Netlify...');
-    
+
     final success = await _webUseCase.deployToNetlify(output, client);
-    
+
     if (success) {
       CliUtils.printSuccess('🌐 Successfully deployed to Netlify!');
     } else {
       CliUtils.printError('Netlify deployment failed');
     }
   }
-  
+
   Future<void> _deployToVercel(String output, String? client) async {
     CliUtils.printInfo('▲ Deploying to Vercel...');
-    
+
     final success = await _webUseCase.deployToVercel(output, client);
-    
+
     if (success) {
       CliUtils.printSuccess('▲ Successfully deployed to Vercel!');
     } else {
       CliUtils.printError('Vercel deployment failed');
     }
   }
-  
+
   Future<void> _deployToGitHubPages(String output, String? client) async {
     CliUtils.printInfo('📄 Deploying to GitHub Pages...');
-    
+
     final success = await _webUseCase.deployToGitHubPages(output, client);
-    
+
     if (success) {
       CliUtils.printSuccess('📄 Successfully deployed to GitHub Pages!');
     } else {
       CliUtils.printError('GitHub Pages deployment failed');
     }
   }
-  
+
   Future<void> _deployToAWS(String output, String? client) async {
     CliUtils.printInfo('☁️ Deploying to AWS S3...');
-    
+
     final success = await _webUseCase.deployToAWS(output, client);
-    
+
     if (success) {
       CliUtils.printSuccess('☁️ Successfully deployed to AWS S3!');
     } else {
       CliUtils.printError('AWS S3 deployment failed');
     }
   }
-  
+
   Future<void> _deployToCustomServer(String output, String? client) async {
     CliUtils.printInfo('🖥️ Deploying to custom server...');
-    
+
     final success = await _webUseCase.deployToCustomServer(output, client);
-    
+
     if (success) {
       CliUtils.printSuccess('🖥️ Successfully deployed to custom server!');
     } else {
       CliUtils.printError('Custom server deployment failed');
     }
   }
-  
+
   Future<void> _showManualDeployment(String output, String? client) async {
     print('\n${CliUtils.formatTitle('Manual Deployment Instructions')}');
     CliUtils.printSeparator();
@@ -588,7 +603,7 @@ class WebHandler {
     print('  • manifest.json - PWA configuration (if enabled)');
     CliUtils.printSeparator();
   }
-  
+
   void _showHelp(ArgParser parser) {
     print('''
 ${CliUtils.formatTitle('Flow CLI Web Development & Deployment')}

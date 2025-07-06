@@ -14,7 +14,7 @@ void main() {
 
     test('should create default config', () {
       final config = ConfigModel.defaultConfig();
-      
+
       expect(config.language, equals('en'));
       expect(config.multiClient, equals(false));
       expect(config.clients, isEmpty);
@@ -35,10 +35,10 @@ void main() {
     test('should add and remove clients', () {
       configService.addClient('client1');
       expect(configService.clients, contains('client1'));
-      
+
       configService.addClient('client2');
       expect(configService.clients.length, equals(2));
-      
+
       configService.removeClient('client1');
       expect(configService.clients, isNot(contains('client1')));
       expect(configService.clients, contains('client2'));
@@ -46,10 +46,10 @@ void main() {
 
     test('should check if configured', () {
       expect(configService.isConfigured, equals(false));
-      
+
       configService.setFlutterPath('/test/flutter');
       configService.setProjectPath('/test/project');
-      
+
       expect(configService.isConfigured, equals(true));
     });
   });

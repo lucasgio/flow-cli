@@ -16,32 +16,35 @@ import 'package:flow_cli/core/utils/cli_utils.dart';
 
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
-    ..addFlag('help', abbr: 'h', help: 'Show this help message', negatable: false)
-    ..addFlag('version', abbr: 'v', help: 'Show version information', negatable: false)
-    ..addOption('language', abbr: 'l', help: 'Set language (en/es)', defaultsTo: 'en');
+    ..addFlag('help',
+        abbr: 'h', help: 'Show this help message', negatable: false)
+    ..addFlag('version',
+        abbr: 'v', help: 'Show version information', negatable: false)
+    ..addOption('language',
+        abbr: 'l', help: 'Set language (en/es)', defaultsTo: 'en');
 
   try {
     final results = parser.parse(arguments);
-    
+
     // Initialize configuration
     await ConfigService.instance.initialize();
-    
+
     // Initialize localization
     await LocalizationService.instance.initialize(results['language']);
-    
+
     if (results['help'] || arguments.isEmpty) {
       _showHelp(parser);
       return;
     }
-    
+
     if (results['version']) {
       _showVersion();
       return;
     }
-    
+
     final command = results.rest.isNotEmpty ? results.rest[0] : '';
     final subArgs = results.rest.skip(1).toList();
-    
+
     switch (command) {
       case 'setup':
         await SetupHandler().handle(subArgs);
@@ -77,7 +80,7 @@ Future<void> main(List<String> arguments) async {
 
 void _showHelp(ArgParser parser) {
   final localization = LocalizationService.instance;
-  
+
   print('''
 ${CliUtils.formatTitle('Flow CLI v${AppConstants.version}')}
 

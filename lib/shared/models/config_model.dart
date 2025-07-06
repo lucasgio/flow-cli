@@ -8,7 +8,7 @@ class ConfigModel {
   final String? currentClient;
   final List<String> clients;
   final Map<String, dynamic> customSettings;
-  
+
   const ConfigModel({
     required this.language,
     this.flutterPath,
@@ -18,7 +18,7 @@ class ConfigModel {
     required this.clients,
     required this.customSettings,
   });
-  
+
   factory ConfigModel.defaultConfig() {
     return const ConfigModel(
       language: AppConstants.defaultLanguage,
@@ -27,7 +27,7 @@ class ConfigModel {
       customSettings: {},
     );
   }
-  
+
   factory ConfigModel.fromJson(Map<String, dynamic> json) {
     return ConfigModel(
       language: json['language'] as String? ?? AppConstants.defaultLanguage,
@@ -39,7 +39,7 @@ class ConfigModel {
       customSettings: json['customSettings'] as Map<String, dynamic>? ?? {},
     );
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
       'language': language,
@@ -51,7 +51,7 @@ class ConfigModel {
       'customSettings': customSettings,
     };
   }
-  
+
   ConfigModel copyWith({
     String? language,
     String? flutterPath,
@@ -71,37 +71,37 @@ class ConfigModel {
       customSettings: customSettings ?? this.customSettings,
     );
   }
-  
+
   @override
   String toString() {
     return 'ConfigModel(language: $language, flutterPath: $flutterPath, projectPath: $projectPath, multiClient: $multiClient, currentClient: $currentClient, clients: $clients)';
   }
-  
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is ConfigModel &&
-      other.language == language &&
-      other.flutterPath == flutterPath &&
-      other.projectPath == projectPath &&
-      other.multiClient == multiClient &&
-      other.currentClient == currentClient &&
-      _listEquals(other.clients, clients) &&
-      _mapEquals(other.customSettings, customSettings);
+        other.language == language &&
+        other.flutterPath == flutterPath &&
+        other.projectPath == projectPath &&
+        other.multiClient == multiClient &&
+        other.currentClient == currentClient &&
+        _listEquals(other.clients, clients) &&
+        _mapEquals(other.customSettings, customSettings);
   }
-  
+
   @override
   int get hashCode {
     return language.hashCode ^
-      flutterPath.hashCode ^
-      projectPath.hashCode ^
-      multiClient.hashCode ^
-      currentClient.hashCode ^
-      clients.hashCode ^
-      customSettings.hashCode;
+        flutterPath.hashCode ^
+        projectPath.hashCode ^
+        multiClient.hashCode ^
+        currentClient.hashCode ^
+        clients.hashCode ^
+        customSettings.hashCode;
   }
-  
+
   bool _listEquals<T>(List<T> a, List<T> b) {
     if (a.length != b.length) return false;
     for (int i = 0; i < a.length; i++) {
@@ -109,7 +109,7 @@ class ConfigModel {
     }
     return true;
   }
-  
+
   bool _mapEquals<K, V>(Map<K, V> a, Map<K, V> b) {
     if (a.length != b.length) return false;
     for (var key in a.keys) {

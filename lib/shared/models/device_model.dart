@@ -7,7 +7,7 @@ class DeviceModel {
   final String? version;
   final String? architecture;
   final Map<String, dynamic> additionalInfo;
-  
+
   const DeviceModel({
     required this.id,
     required this.name,
@@ -18,7 +18,7 @@ class DeviceModel {
     this.architecture,
     this.additionalInfo = const {},
   });
-  
+
   factory DeviceModel.fromJson(Map<String, dynamic> json) {
     return DeviceModel(
       id: json['id'] as String,
@@ -31,7 +31,7 @@ class DeviceModel {
       additionalInfo: json['additionalInfo'] as Map<String, dynamic>? ?? {},
     );
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -44,7 +44,7 @@ class DeviceModel {
       'additionalInfo': additionalInfo,
     };
   }
-  
+
   DeviceModel copyWith({
     String? id,
     String? name,
@@ -66,34 +66,34 @@ class DeviceModel {
       additionalInfo: additionalInfo ?? this.additionalInfo,
     );
   }
-  
+
   @override
   String toString() {
     return 'DeviceModel(id: $id, name: $name, platform: $platform, isPhysical: $isPhysical, isOnline: $isOnline, version: $version)';
   }
-  
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is DeviceModel &&
-      other.id == id &&
-      other.name == name &&
-      other.platform == platform &&
-      other.isPhysical == isPhysical &&
-      other.isOnline == isOnline &&
-      other.version == version &&
-      other.architecture == architecture;
+        other.id == id &&
+        other.name == name &&
+        other.platform == platform &&
+        other.isPhysical == isPhysical &&
+        other.isOnline == isOnline &&
+        other.version == version &&
+        other.architecture == architecture;
   }
-  
+
   @override
   int get hashCode {
     return id.hashCode ^
-      name.hashCode ^
-      platform.hashCode ^
-      isPhysical.hashCode ^
-      isOnline.hashCode ^
-      version.hashCode ^
-      architecture.hashCode;
+        name.hashCode ^
+        platform.hashCode ^
+        isPhysical.hashCode ^
+        isOnline.hashCode ^
+        version.hashCode ^
+        architecture.hashCode;
   }
 }
