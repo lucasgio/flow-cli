@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.3] - 2024-07-06
 
 ### Changed
-- Updated CI/CD to use official Flutter publish workflow
-- Simplified publishing process using OIDC authentication
-- Removed manual PUB_TOKEN requirement
+- Simplified CI/CD workflow to focus on testing, building, and release assets
+- Removed automated publishing to pub.dev (now manual process)
+- CI/CD only handles: tests, builds, and GitHub release assets
+
+### Removed
+- Automated pub.dev publishing from CI/CD
+- PUB_TOKEN dependency from workflows
 
 ## [1.0.2] - 2024-07-06
 

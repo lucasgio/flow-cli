@@ -9,15 +9,13 @@ on:
 # Publish using custom workflow
 jobs:
   publish:
-    permissions:
-      id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v2
       - name: Install dependencies
         run: dart pub get
-      # Here you can insert custom steps you need
-      # - run: dart tool/generate-code.dart
       - name: Publish
-        run: dart pub publish --force 
+        run: dart pub publish --force
+        env:
+          PUB_TOKEN: ${{ secrets.PUB_TOKEN }}
