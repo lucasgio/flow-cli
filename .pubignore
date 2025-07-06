@@ -5,7 +5,7 @@ flow_cli_*
 *.exe
 
 # Build artifacts
-build/
+/build/
 .dart_tool/
 .packages
 

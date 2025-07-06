@@ -1,5 +1,5 @@
 class AppConstants {
-  static const String version = '1.0.0';
+  static const String version = '1.0.2';
   static const String appName = 'Flow CLI';
   static const String description =
       'A comprehensive Flutter CLI tool for project management';
