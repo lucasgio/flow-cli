@@ -24,6 +24,35 @@ Added required metadata fields:
 - **Release Assets**: All platform executables are uploaded to GitHub releases
 - **Publishing**: Automated publishing to pub.dev on release
 
+## Workflow Issues Fixed ✅
+
+### Problem: Build and Publish Jobs Not Running
+
+**Issue**: The original workflow had a matrix strategy that wasn't working properly for the build job.
+
+**Solution**: 
+- Split the single `build` job into three separate jobs: `build-linux`, `build-macos`, `build-windows`
+- Each job runs on its specific platform
+- Fixed artifact naming and download process
+- Added manual workflow for testing
+
+### Workflow Structure
+
+#### Main CI/CD Workflow (`.github/workflows/ci.yml`)
+- **Triggers**: Push to main/develop, PR to main, Release published
+- **Jobs**:
+  - `test`: Runs on all platforms with multiple Dart versions
+  - `build-linux`: Builds Linux executable (release only)
+  - `build-macos`: Builds macOS executable (release only)
+  - `build-windows`: Builds Windows executable (release only)
+  - `publish`: Publishes to pub.dev (release only)
+  - `release`: Creates GitHub release assets (release only)
+
+#### Manual Workflow (`.github/workflows/manual-publish.yml`)
+- **Triggers**: Manual workflow dispatch
+- **Purpose**: Test build and publish without creating a release
+- **Options**: Can choose to publish to pub.dev or just build executables
+
 ## Publishing Requirements ✅
 
 Based on the [Dart publishing documentation](https://dart.dev/tools/pub/publishing), all requirements are met:
@@ -69,6 +98,21 @@ The package will be automatically published when:
 1. A GitHub release is created
 2. All CI/CD tests pass
 3. The `PUB_TOKEN` secret is configured in GitHub
+
+### Manual Workflow Testing
+To test the build and publish process without creating a release:
+
+1. Go to GitHub repository → Actions
+2. Select "Manual Publish" workflow
+3. Click "Run workflow"
+4. Choose whether to publish to pub.dev or just build executables
+5. Click "Run workflow"
+
+This allows you to:
+- Test the build process on all platforms
+- Verify executables are created correctly
+- Test publishing without creating a release
+- Debug any workflow issues
 
 ## Required Secrets
 

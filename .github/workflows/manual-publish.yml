@@ -1,12 +1,13 @@
-name: CI/CD
+name: Manual Publish
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
-  release:
-    types: [ published ]
+  workflow_dispatch:
+    inputs:
+      publish_to_pub:
+        description: 'Publish to pub.dev'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   test:
@@ -14,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        dart-version: [3.0.0, stable]
+        dart-version: [stable]
     
     steps:
     - uses: actions/checkout@v4
@@ -57,7 +58,6 @@ jobs:
   build-linux:
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
     
     steps:
     - uses: actions/checkout@v4
@@ -83,7 +83,6 @@ jobs:
   build-macos:
     needs: test
     runs-on: macos-latest
-    if: github.event_name == 'release'
     
     steps:
     - uses: actions/checkout@v4
@@ -109,7 +108,6 @@ jobs:
   build-windows:
     needs: test
     runs-on: windows-latest
-    if: github.event_name == 'release'
     
     steps:
     - uses: actions/checkout@v4
@@ -135,7 +133,7 @@ jobs:
   publish:
     needs: [test, build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+    if: inputs.publish_to_pub == 'true'
     
     steps:
     - uses: actions/checkout@v4
@@ -153,10 +151,10 @@ jobs:
       env:
         PUB_TOKEN: ${{ secrets.PUB_TOKEN }}
 
-  release:
+  download-artifacts:
     needs: [test, build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+    if: inputs.publish_to_pub == 'false'
     
     steps:
     - uses: actions/checkout@v4
@@ -179,32 +177,8 @@ jobs:
         name: flow_cli_windows
         path: ./artifacts
     
-    - name: Upload Release Assets - Linux
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./artifacts/flow_cli_linux
-        asset_name: flow_cli_linux
-        asset_content_type: application/octet-stream
-    
-    - name: Upload Release Assets - macOS
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./artifacts/flow_cli_macos
-        asset_name: flow_cli_macos
-        asset_content_type: application/octet-stream
-    
-    - name: Upload Release Assets - Windows
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./artifacts/flow_cli_windows.exe
-        asset_name: flow_cli_windows.exe
-        asset_content_type: application/octet-stream
+    - name: List artifacts
+      run: |
+        echo "Built executables:"
+        ls -la ./artifacts/
+        echo "Package is ready for publishing!" 
