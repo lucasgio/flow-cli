@@ -135,7 +135,7 @@ jobs:
   publish:
     needs: [test, build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+    if: github.event_name == 'release' || github.ref == 'refs/heads/main'
     
     steps:
     - uses: actions/checkout@v4
@@ -156,7 +156,7 @@ jobs:
   release:
     needs: [test, build-linux, build-macos, build-windows]
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+    if: github.event_name == 'release' || github.ref == 'refs/heads/main'
     
     steps:
     - uses: actions/checkout@v4
