@@ -37,65 +37,27 @@ jobs:
       run: dart test
     
     - name: Compile executable
-      run: dart compile exe bin/main.dart -o flow_cli
-    
+      run: |
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          dart compile exe bin/main.dart -o flow_cli.exe
+        else
+          dart compile exe bin/main.dart -o flow_cli
+        fi
+      shell: bash
+
     - name: Test executable
-      run: ./flow_cli --help
+      run: |
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          ./flow_cli.exe --help
+        else
+          ./flow_cli --help
+        fi
       shell: bash
 
   build:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     if: github.event_name == 'release'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Dart
-      uses: dart-lang/setup-dart@v1
-      with:
-        dart-version: stable
-    
-    - name: Install dependencies
-      run: dart pub get
-    
-    - name: Build executables
-      run: |
-        dart compile exe bin/main.dart -o flow_cli_linux
-        
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: flow_cli_executables
-        path: |
-          flow_cli_linux
-
-  publish:
-    needs: [test, build]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Dart
-      uses: dart-lang/setup-dart@v1
-      with:
-        dart-version: stable
-    
-    - name: Install dependencies
-      run: dart pub get
-    
-    - name: Publish to pub.dev
-      run: dart pub publish --force
-      env:
-        PUB_TOKEN: ${{ secrets.PUB_TOKEN }}
-
-  release:
-    needs: [test, build]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-    
     strategy:
       matrix:
         include:
@@ -128,13 +90,74 @@ jobs:
           dart compile exe bin/main.dart -o ${{ matrix.artifact_name }}
         fi
       shell: bash
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: flow_cli_executables
+        path: ${{ matrix.artifact_name }}
+
+  publish:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
     
-    - name: Upload Release Asset
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
+      with:
+        dart-version: stable
+    
+    - name: Install dependencies
+      run: dart pub get
+    
+    - name: Publish to pub.dev
+      run: dart pub publish --force
+      env:
+        PUB_TOKEN: ${{ secrets.PUB_TOKEN }}
+
+  release:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: flow_cli_executables
+        path: ./artifacts
+    
+    - name: Upload Release Assets
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./${{ matrix.artifact_name }}
-        asset_name: ${{ matrix.asset_name }}
+        asset_path: ./artifacts/flow_cli_linux
+        asset_name: flow_cli_linux
+        asset_content_type: application/octet-stream
+    
+    - name: Upload Release Assets - macOS
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./artifacts/flow_cli_macos
+        asset_name: flow_cli_macos
+        asset_content_type: application/octet-stream
+    
+    - name: Upload Release Assets - Windows
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./artifacts/flow_cli_windows.exe
+        asset_name: flow_cli_windows.exe
         asset_content_type: application/octet-stream

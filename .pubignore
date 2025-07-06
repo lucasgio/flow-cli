@@ -1,0 +1,38 @@
+# Compiled executables
+flow
+flow_cli
+flow_cli_*
+*.exe
+
+# Build artifacts
+build/
+.dart_tool/
+.packages
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# CI/CD
+.github/
+
+# Python script (not needed for Dart package)
+generate_branding.py
+
+# Test artifacts
+test/coverage/
+.coverage
+
+# Temporary files
+*.tmp
+*.temp 
